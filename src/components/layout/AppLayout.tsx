@@ -1,7 +1,7 @@
 
 import { useEffect } from "react";
 import { Outlet, Navigate, useNavigate } from "react-router-dom";
-import { useAuth } from "@/contexts/AuthContext";
+import { useAuth } from "@/contexts/auth";
 import Sidebar from "./Sidebar";
 import Header from "./Header";
 

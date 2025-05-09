@@ -28,6 +28,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const { data: { session } } = await supabase.auth.getSession();
         
         if (session) {
+          console.log("Sessão encontrada:", session.user.id);
+          
           // Buscar dados do perfil do usuário
           const { data: profileData, error: profileError } = await supabase
             .from('profiles')
@@ -41,6 +43,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           }
           
           if (profileData) {
+            console.log("Perfil encontrado:", profileData);
             const user: User = {
               id: profileData.id,
               name: profileData.name,
@@ -64,6 +67,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     // Configurar listener para mudanças de autenticação
     const { data: authListener } = supabase.auth.onAuthStateChange(async (event, session) => {
+      console.log("Auth state changed:", event, session?.user.id);
+      
       if (event === 'SIGNED_IN' && session) {
         // Buscar dados do perfil do usuário
         const { data: profileData, error: profileError } = await supabase
@@ -73,6 +78,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           .single();
         
         if (!profileError && profileData) {
+          console.log("Perfil atualizado após sign in:", profileData);
           const user: User = {
             id: profileData.id,
             name: profileData.name,
@@ -82,8 +88,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           };
           
           setCurrentUser(user);
+        } else {
+          console.error('Erro ao buscar perfil após sign in:', profileError);
         }
       } else if (event === 'SIGNED_OUT') {
+        console.log("Usuário desconectado");
         setCurrentUser(null);
       }
     });
@@ -97,12 +106,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setLoading(true);
     
     try {
+      console.log("Tentando login com:", email);
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password
       });
       
       if (error) {
+        console.error("Erro ao fazer login:", error);
         toast.error(error.message);
         return false;
       }
@@ -115,6 +126,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return false;
       }
     } catch (error: any) {
+      console.error("Exceção no login:", error);
       toast.error('Erro ao fazer login: ' + error.message);
       return false;
     } finally {
@@ -128,6 +140,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setCurrentUser(null);
       toast.info('Você saiu da sua conta');
     } catch (error: any) {
+      console.error("Erro ao logout:", error);
       toast.error('Erro ao sair: ' + error.message);
     }
   };
@@ -136,6 +149,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setLoading(true);
     
     try {
+      console.log("Tentando registrar:", email, "como", role);
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
@@ -148,6 +162,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       });
       
       if (error) {
+        console.error("Erro ao registrar:", error);
         toast.error(error.message);
         return false;
       }
@@ -160,6 +175,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return false;
       }
     } catch (error: any) {
+      console.error("Exceção no registro:", error);
       toast.error('Erro ao criar conta: ' + error.message);
       return false;
     } finally {

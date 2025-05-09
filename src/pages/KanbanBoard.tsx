@@ -53,15 +53,16 @@ const KanbanBoard = () => {
     }
   };
 
-  const handleDeleteTask = () => {
-    if (selectedTask) {
-      deleteTask(selectedTask.id);
+  const handleDeleteTask = (taskId: string) => {
+    deleteTask(taskId);
+    // If the deleted task is currently selected, close the detail dialog
+    if (selectedTask && selectedTask.id === taskId) {
       setSelectedTask(null);
-      toast.success("Task deleted");
     }
+    toast.success("Task deleted");
   };
 
-  // New function to navigate to the Add Task page
+  // Navigate to the Add Task page
   const handleNavigateToAddTask = () => {
     navigate('/tasks/new');
   };
@@ -96,6 +97,17 @@ const KanbanBoard = () => {
     );
   }
 
+  // Helper function to render task cards with delete button
+  const renderTaskCard = (task: Task) => (
+    <TaskCard 
+      key={task.id}
+      task={task}
+      onDragStart={handleDragStart}
+      onClick={handleTaskClick}
+      onDelete={handleDeleteTask}
+    />
+  );
+
   return (
     <div className="flex flex-col h-full w-full pt-4">
       <div className="w-full">
@@ -122,6 +134,7 @@ const KanbanBoard = () => {
             onTaskDragStart={handleDragStart}
             onTaskClick={handleTaskClick}
             emptyStateMessage={<p className="text-sm text-gray-500 text-center my-4">No tasks to do</p>}
+            renderTask={renderTaskCard}
           />
           
           <KanbanColumn
@@ -133,6 +146,7 @@ const KanbanBoard = () => {
             onTaskDragStart={handleDragStart}
             onTaskClick={handleTaskClick}
             emptyStateMessage={<p className="text-sm text-gray-500 text-center my-4">No tasks in progress</p>}
+            renderTask={renderTaskCard}
           />
           
           <KanbanColumn
@@ -144,6 +158,7 @@ const KanbanBoard = () => {
             onTaskDragStart={handleDragStart}
             onTaskClick={handleTaskClick}
             emptyStateMessage={<p className="text-sm text-gray-500 text-center my-4">No completed tasks</p>}
+            renderTask={renderTaskCard}
           />
         </div>
         

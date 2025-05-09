@@ -3,16 +3,31 @@ import { Task } from "@/types";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useUsers } from "@/contexts/UserContext";
+import { Trash } from "lucide-react";
+import { useAuth } from "@/contexts/auth";
+import { Button } from "@/components/ui/button";
 
 interface TaskCardProps {
   task: Task;
   onDragStart: (task: Task) => void;
   onClick: (task: Task) => void;
+  onDelete?: (taskId: string) => void;
 }
 
-const TaskCard = ({ task, onDragStart, onClick }: TaskCardProps) => {
+const TaskCard = ({ task, onDragStart, onClick, onDelete }: TaskCardProps) => {
   const { getUsersByIds } = useUsers();
+  const { currentUser } = useAuth();
   const assignedUsers = getUsersByIds(task.assignees);
+  
+  // Check if the current user is an admin and created this task
+  const canDelete = currentUser?.role === 'admin' && currentUser?.id === task.createdBy;
+  
+  const handleDelete = (e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent triggering the card's onClick
+    if (onDelete) {
+      onDelete(task.id);
+    }
+  };
   
   return (
     <div
@@ -28,6 +43,18 @@ const TaskCard = ({ task, onDragStart, onClick }: TaskCardProps) => {
             {task.unit}
           </Badge>
         </div>
+        
+        {canDelete && (
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            className="h-8 w-8 p-0 rounded-full text-red-500 hover:text-red-700 hover:bg-red-100" 
+            onClick={handleDelete}
+          >
+            <Trash className="h-4 w-4" />
+            <span className="sr-only">Delete task</span>
+          </Button>
+        )}
       </div>
       <p className="task-description">{task.description}</p>
       

@@ -1,7 +1,7 @@
 
+import React, { ReactNode } from "react";
 import { Task, TaskStatus } from "@/types";
 import TaskCard from "./TaskCard";
-import { ReactNode } from "react";
 
 interface KanbanColumnProps {
   title: string;
@@ -11,7 +11,8 @@ interface KanbanColumnProps {
   onDrop: (status: TaskStatus) => void;
   onTaskDragStart: (task: Task) => void;
   onTaskClick: (task: Task) => void;
-  emptyStateMessage: ReactNode;
+  emptyStateMessage?: ReactNode;
+  renderTask?: (task: Task) => ReactNode;
 }
 
 const KanbanColumn = ({
@@ -22,28 +23,34 @@ const KanbanColumn = ({
   onDrop,
   onTaskDragStart,
   onTaskClick,
-  emptyStateMessage
+  emptyStateMessage,
+  renderTask,
 }: KanbanColumnProps) => {
   return (
-    <div
-      className="kanban-column"
+    <div 
+      className={`kanban-column kanban-${status}`}
       onDragOver={onDragOver}
       onDrop={() => onDrop(status)}
     >
-      <div className="column-header">
-        <span>{title}</span>
-        <span className="header-count">{tasks.length}</span>
+      <div className="kanban-column-header">
+        <h3>{title}</h3>
+        <span className="task-count">{tasks.length}</span>
       </div>
-      <div className="flex-1 overflow-y-auto">
-        {tasks.map((task) => (
-          <TaskCard 
-            key={task.id} 
-            task={task} 
-            onDragStart={onTaskDragStart} 
-            onClick={onTaskClick} 
-          />
-        ))}
-        {tasks.length === 0 && emptyStateMessage}
+      <div className="kanban-tasks">
+        {tasks.length > 0 ? (
+          tasks.map((task) => (
+            renderTask ? renderTask(task) : (
+              <TaskCard 
+                key={task.id}
+                task={task}
+                onDragStart={onTaskDragStart}
+                onClick={onTaskClick}
+              />
+            )
+          ))
+        ) : (
+          emptyStateMessage
+        )}
       </div>
     </div>
   );

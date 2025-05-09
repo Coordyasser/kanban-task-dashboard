@@ -1,8 +1,8 @@
 
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { User } from '../types';
-import { mockUsers } from '../services/mockData';
 import { toast } from 'sonner';
+import { supabase } from '../integrations/supabase/client';
 
 interface AuthContextType {
   currentUser: User | null;
@@ -18,73 +18,153 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
+  // Verificar sessão atual ao iniciar
   useEffect(() => {
-    // Check if there's a saved user in localStorage
-    const savedUser = localStorage.getItem('currentUser');
-    if (savedUser) {
-      setCurrentUser(JSON.parse(savedUser));
-    }
-    setLoading(false);
+    const checkSession = async () => {
+      setLoading(true);
+      
+      try {
+        // Verificar se já existe uma sessão ativa
+        const { data: { session } } = await supabase.auth.getSession();
+        
+        if (session) {
+          // Buscar dados do perfil do usuário
+          const { data: profileData, error: profileError } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('id', session.user.id)
+            .single();
+          
+          if (profileError) {
+            console.error('Erro ao buscar perfil:', profileError);
+            throw profileError;
+          }
+          
+          if (profileData) {
+            const user: User = {
+              id: profileData.id,
+              name: profileData.name,
+              email: profileData.email,
+              role: profileData.role,
+              avatar: profileData.avatar || undefined
+            };
+            
+            setCurrentUser(user);
+          }
+        }
+      } catch (error) {
+        console.error('Erro na verificação da sessão:', error);
+        toast.error('Erro ao verificar a sessão');
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    checkSession();
+
+    // Configurar listener para mudanças de autenticação
+    const { data: authListener } = supabase.auth.onAuthStateChange(async (event, session) => {
+      if (event === 'SIGNED_IN' && session) {
+        // Buscar dados do perfil do usuário
+        const { data: profileData, error: profileError } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', session.user.id)
+          .single();
+        
+        if (!profileError && profileData) {
+          const user: User = {
+            id: profileData.id,
+            name: profileData.name,
+            email: profileData.email,
+            role: profileData.role,
+            avatar: profileData.avatar || undefined
+          };
+          
+          setCurrentUser(user);
+        }
+      } else if (event === 'SIGNED_OUT') {
+        setCurrentUser(null);
+      }
+    });
+
+    return () => {
+      authListener.subscription.unsubscribe();
+    };
   }, []);
 
   const login = async (email: string, password: string): Promise<boolean> => {
     setLoading(true);
     
-    // Simulate API call delay
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    // Find user by email (in a real app, we would check password too)
-    const user = mockUsers.find(u => u.email.toLowerCase() === email.toLowerCase());
-    
-    if (user) {
-      setCurrentUser(user);
-      localStorage.setItem('currentUser', JSON.stringify(user));
-      toast.success('Login successful');
-      setLoading(false);
-      return true;
-    } else {
-      toast.error('Invalid credentials');
-      setLoading(false);
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password
+      });
+      
+      if (error) {
+        toast.error(error.message);
+        return false;
+      }
+      
+      if (data.user) {
+        toast.success('Login realizado com sucesso');
+        return true;
+      } else {
+        toast.error('Erro ao fazer login');
+        return false;
+      }
+    } catch (error: any) {
+      toast.error('Erro ao fazer login: ' + error.message);
       return false;
+    } finally {
+      setLoading(false);
     }
   };
 
-  const logout = () => {
-    setCurrentUser(null);
-    localStorage.removeItem('currentUser');
-    toast.info('You have been logged out');
+  const logout = async () => {
+    try {
+      await supabase.auth.signOut();
+      setCurrentUser(null);
+      toast.info('Você saiu da sua conta');
+    } catch (error: any) {
+      toast.error('Erro ao sair: ' + error.message);
+    }
   };
 
   const register = async (name: string, email: string, password: string, role: 'admin' | 'user'): Promise<boolean> => {
     setLoading(true);
     
-    // Simulate API call delay
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    // Check if email is already taken
-    const userExists = mockUsers.some(u => u.email.toLowerCase() === email.toLowerCase());
-    
-    if (userExists) {
-      toast.error('Email already in use');
-      setLoading(false);
+    try {
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            name,
+            role
+          }
+        }
+      });
+      
+      if (error) {
+        toast.error(error.message);
+        return false;
+      }
+      
+      if (data.user) {
+        toast.success('Cadastro realizado com sucesso');
+        return true;
+      } else {
+        toast.error('Erro ao criar conta');
+        return false;
+      }
+    } catch (error: any) {
+      toast.error('Erro ao criar conta: ' + error.message);
       return false;
+    } finally {
+      setLoading(false);
     }
-    
-    // In a real app, we would create a user in the database
-    // For our mock data, we'll create a user object but won't add it to mockUsers
-    const newUser: User = {
-      id: `${mockUsers.length + 1}`,
-      name,
-      email,
-      role,
-      avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${name}`,
-    };
-    
-    setCurrentUser(newUser);
-    localStorage.setItem('currentUser', JSON.stringify(newUser));
-    toast.success('Account created successfully');
-    setLoading(false);
-    return true;
   };
 
   return (

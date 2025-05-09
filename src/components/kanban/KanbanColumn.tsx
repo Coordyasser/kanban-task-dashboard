@@ -34,7 +34,7 @@ const KanbanColumn = ({
         <span>{title}</span>
         <span className="header-count">{tasks.length}</span>
       </div>
-      <div>
+      <div className="flex-1 overflow-y-auto">
         {tasks.map((task) => (
           <TaskCard 
             key={task.id} 

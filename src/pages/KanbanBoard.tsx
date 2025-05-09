@@ -70,96 +70,100 @@ const KanbanBoard = () => {
 
   if (loading) {
     return (
-      <div className="space-y-6">
-        <div className="flex justify-between items-center">
-          <Skeleton className="h-8 w-48" />
-          <Skeleton className="h-10 w-32" />
-        </div>
-        
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {[1, 2, 3].map((column) => (
-            <div key={column} className="bg-background/50 rounded-lg p-4 border border-border/50">
-              <div className="flex items-center justify-between mb-4">
-                <Skeleton className="h-6 w-24" />
-                <Skeleton className="h-6 w-6 rounded-full" />
+      <div className="flex flex-col h-full justify-center items-center">
+        <div className="space-y-6 w-full max-w-5xl">
+          <div className="flex justify-between items-center">
+            <Skeleton className="h-8 w-48" />
+            <Skeleton className="h-10 w-32" />
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {[1, 2, 3].map((column) => (
+              <div key={column} className="bg-background/50 rounded-lg p-4 border border-border/50">
+                <div className="flex items-center justify-between mb-4">
+                  <Skeleton className="h-6 w-24" />
+                  <Skeleton className="h-6 w-6 rounded-full" />
+                </div>
+                
+                <div className="space-y-3">
+                  {[1, 2, 3].map((task) => (
+                    <Skeleton key={task} className="h-32 w-full rounded-md" />
+                  ))}
+                </div>
               </div>
-              
-              <div className="space-y-3">
-                {[1, 2, 3].map((task) => (
-                  <Skeleton key={task} className="h-32 w-full rounded-md" />
-                ))}
-              </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">DPGEtask Kanban</h1>
-        {currentUser?.role === 'admin' && (
-          <Button 
-            className="glassmorphism bg-primary/80 hover:bg-primary/90 rounded-full h-12 w-12 p-0 fixed bottom-6 right-6 md:static md:h-10 md:w-auto md:px-4 md:py-2 shadow-lg hover:shadow-xl transition-all duration-300 z-10"
-            onClick={() => setIsCreateModalOpen(true)}
-          >
-            <Plus className="h-5 w-5 md:mr-2" />
-            <span className="hidden md:inline">Create Task</span>
-          </Button>
-        )}
-      </div>
-      
-      <div className="kanban-board">
-        <KanbanColumn
-          title="To Do"
-          tasks={todoTasks}
-          status="todo"
-          onDragOver={handleDragOver}
-          onDrop={handleDrop}
-          onTaskDragStart={handleDragStart}
-          onTaskClick={handleTaskClick}
-          emptyStateMessage={<p className="text-sm text-gray-500 text-center my-4">No tasks to do</p>}
+    <div className="flex flex-col h-full justify-center items-center">
+      <div className="w-full max-w-5xl">
+        <div className="flex justify-between items-center mb-6">
+          <h1 className="text-2xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">DPGEtask Kanban</h1>
+          {currentUser?.role === 'admin' && (
+            <Button 
+              className="glassmorphism bg-primary/80 hover:bg-primary/90 rounded-full h-12 w-12 p-0 fixed bottom-6 right-6 md:static md:h-10 md:w-auto md:px-4 md:py-2 shadow-lg hover:shadow-xl transition-all duration-300 z-10"
+              onClick={() => setIsCreateModalOpen(true)}
+            >
+              <Plus className="h-5 w-5 md:mr-2" />
+              <span className="hidden md:inline">Create Task</span>
+            </Button>
+          )}
+        </div>
+        
+        <div className="kanban-board">
+          <KanbanColumn
+            title="To Do"
+            tasks={todoTasks}
+            status="todo"
+            onDragOver={handleDragOver}
+            onDrop={handleDrop}
+            onTaskDragStart={handleDragStart}
+            onTaskClick={handleTaskClick}
+            emptyStateMessage={<p className="text-sm text-gray-500 text-center my-4">No tasks to do</p>}
+          />
+          
+          <KanbanColumn
+            title="In Progress"
+            tasks={progressTasks}
+            status="progress"
+            onDragOver={handleDragOver}
+            onDrop={handleDrop}
+            onTaskDragStart={handleDragStart}
+            onTaskClick={handleTaskClick}
+            emptyStateMessage={<p className="text-sm text-gray-500 text-center my-4">No tasks in progress</p>}
+          />
+          
+          <KanbanColumn
+            title="Completed"
+            tasks={completedTasks}
+            status="completed"
+            onDragOver={handleDragOver}
+            onDrop={handleDrop}
+            onTaskDragStart={handleDragStart}
+            onTaskClick={handleTaskClick}
+            emptyStateMessage={<p className="text-sm text-gray-500 text-center my-4">No completed tasks</p>}
+          />
+        </div>
+        
+        <TaskDetailDialog
+          task={selectedTask}
+          observation={observation}
+          setObservation={setObservation}
+          onClose={() => setSelectedTask(null)}
+          onSave={handleSaveObservation}
+          onDelete={handleDeleteTask}
         />
         
-        <KanbanColumn
-          title="In Progress"
-          tasks={progressTasks}
-          status="progress"
-          onDragOver={handleDragOver}
-          onDrop={handleDrop}
-          onTaskDragStart={handleDragStart}
-          onTaskClick={handleTaskClick}
-          emptyStateMessage={<p className="text-sm text-gray-500 text-center my-4">No tasks in progress</p>}
-        />
-        
-        <KanbanColumn
-          title="Completed"
-          tasks={completedTasks}
-          status="completed"
-          onDragOver={handleDragOver}
-          onDrop={handleDrop}
-          onTaskDragStart={handleDragStart}
-          onTaskClick={handleTaskClick}
-          emptyStateMessage={<p className="text-sm text-gray-500 text-center my-4">No completed tasks</p>}
+        <CreateTaskDialog
+          isOpen={isCreateModalOpen}
+          onClose={() => setIsCreateModalOpen(false)}
+          onCreateTask={handleCreateTask}
         />
       </div>
-      
-      <TaskDetailDialog
-        task={selectedTask}
-        observation={observation}
-        setObservation={setObservation}
-        onClose={() => setSelectedTask(null)}
-        onSave={handleSaveObservation}
-        onDelete={handleDeleteTask}
-      />
-      
-      <CreateTaskDialog
-        isOpen={isCreateModalOpen}
-        onClose={() => setIsCreateModalOpen(false)}
-        onCreateTask={handleCreateTask}
-      />
     </div>
   );
 };

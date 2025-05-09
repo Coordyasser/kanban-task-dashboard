@@ -120,13 +120,25 @@
 }
 
 .kanban-board {
-  @apply grid grid-cols-1 md:grid-cols-3 gap-4 p-4;
-  min-height: 70vh;
+  @apply grid grid-cols-1 md:grid-cols-3 gap-4;
+  min-height: 60vh;
+  width: 100%;
 }
 
 .kanban-column {
   @apply bg-white/80 backdrop-blur-sm rounded-lg shadow p-4 border border-white/30;
+  height: 100%;
   min-height: 300px;
+  display: flex;
+  flex-direction: column;
+}
+
+.column-header {
+  @apply font-bold mb-3 pb-2 border-b flex justify-between items-center;
+}
+
+.header-count {
+  @apply text-xs bg-gray-200 rounded-full px-2 py-1;
 }
 
 .task-card {
@@ -171,14 +183,6 @@
 
 .dragging {
   @apply opacity-50 shadow-md;
-}
-
-.column-header {
-  @apply font-bold mb-3 pb-2 border-b flex justify-between items-center;
-}
-
-.header-count {
-  @apply text-xs bg-gray-200 rounded-full px-2 py-1;
 }
 
 .app-header {

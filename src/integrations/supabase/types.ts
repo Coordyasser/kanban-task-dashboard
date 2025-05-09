@@ -83,6 +83,7 @@ export type Database = {
           end_date: string
           id: string
           observations: string | null
+          raw_metadata: Json | null
           start_date: string
           status: Database["public"]["Enums"]["task_status"]
           title: string
@@ -96,6 +97,7 @@ export type Database = {
           end_date: string
           id?: string
           observations?: string | null
+          raw_metadata?: Json | null
           start_date: string
           status?: Database["public"]["Enums"]["task_status"]
           title: string
@@ -109,6 +111,7 @@ export type Database = {
           end_date?: string
           id?: string
           observations?: string | null
+          raw_metadata?: Json | null
           start_date?: string
           status?: Database["public"]["Enums"]["task_status"]
           title?: string
@@ -157,15 +160,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      check_users_without_profiles: {
-        Args: Record<PropertyKey, never>
-        Returns: {
-          user_id: string
-          email: string
-          created_at: string
-          error_message: string
-        }[]
-      }
+      [_ in never]: never
     }
     Enums: {
       task_status: "todo" | "progress" | "completed"

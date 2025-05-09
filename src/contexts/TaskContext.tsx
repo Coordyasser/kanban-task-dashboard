@@ -108,17 +108,19 @@ export function TaskProvider({ children }: { children: ReactNode }) {
 
     try {
       // First, insert the task
-      const { data: taskData, error: taskError } = await supabase
+      const taskToInsert = {
+        title: taskData.title,
+        description: taskData.description,
+        unit: taskData.unit,
+        start_date: taskData.startDate,
+        end_date: taskData.endDate,
+        status: taskData.status,
+        created_by: currentUser.id
+      };
+      
+      const { data: insertedTask, error: taskError } = await supabase
         .from('tasks')
-        .insert({
-          title: taskData.title,
-          description: taskData.description,
-          unit: taskData.unit,
-          start_date: taskData.startDate,
-          end_date: taskData.endDate,
-          status: taskData.status,
-          created_by: currentUser.id
-        })
+        .insert(taskToInsert)
         .select()
         .single();
 
@@ -126,7 +128,7 @@ export function TaskProvider({ children }: { children: ReactNode }) {
 
       // Then, create the assignments
       const assignments = taskData.assignees.map((userId: string) => ({
-        task_id: taskData.id,
+        task_id: insertedTask.id,
         user_id: userId
       }));
 

@@ -3,7 +3,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "./contexts/AuthContext";
 import { TaskProvider } from "./contexts/TaskContext";
 import { UserProvider } from "./contexts/UserContext";
@@ -19,7 +19,15 @@ import UserList from "./pages/UserList";
 import AppLayout from "./components/layout/AppLayout";
 import NotFound from "./pages/NotFound";
 
-const queryClient = new QueryClient();
+// Create a new QueryClient instance
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: 1,
+      refetchOnWindowFocus: false,
+    },
+  },
+});
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
@@ -31,11 +39,12 @@ const App = () => (
             <Sonner />
             <BrowserRouter>
               <Routes>
+                {/* Public routes */}
                 <Route path="/" element={<Index />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
                 
-                {/* Protected Routes */}
+                {/* Protected routes wrapped in AppLayout */}
                 <Route element={<AppLayout />}>
                   <Route path="/dashboard" element={<Dashboard />} />
                   <Route path="/kanban" element={<KanbanBoard />} />
@@ -45,6 +54,7 @@ const App = () => (
                   <Route path="/users" element={<UserList />} />
                 </Route>
                 
+                {/* Fallback route */}
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </BrowserRouter>

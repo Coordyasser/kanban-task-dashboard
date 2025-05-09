@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { toast } from "sonner";
 
 const Register = () => {
   const [name, setName] = useState("");
@@ -16,8 +17,15 @@ const Register = () => {
   const [role, setRole] = useState<"admin" | "user">("user");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
-  const { register } = useAuth();
+  const { register, currentUser } = useAuth();
   const navigate = useNavigate();
+
+  // Redirect if already logged in
+  useEffect(() => {
+    if (currentUser) {
+      navigate("/dashboard", { replace: true });
+    }
+  }, [currentUser, navigate]);
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -25,6 +33,7 @@ const Register = () => {
     
     if (password !== confirmPassword) {
       setError("Passwords do not match");
+      toast.error("Passwords do not match");
       return;
     }
     
@@ -33,8 +42,11 @@ const Register = () => {
     try {
       const success = await register(name, email, password, role);
       if (success) {
-        navigate("/dashboard");
+        navigate("/dashboard", { replace: true });
       }
+    } catch (error: any) {
+      console.error("Registration error:", error);
+      toast.error(`Registration failed: ${error.message || "Unknown error"}`);
     } finally {
       setIsSubmitting(false);
     }
@@ -57,6 +69,7 @@ const Register = () => {
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 required
+                autoFocus
               />
             </div>
             <div className="space-y-2">

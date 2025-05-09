@@ -1,13 +1,15 @@
 
-import { Outlet, Navigate } from "react-router-dom";
+import { useEffect } from "react";
+import { Outlet, Navigate, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import Sidebar from "./Sidebar";
 import Header from "./Header";
 
 const AppLayout = () => {
   const { currentUser, loading } = useAuth();
+  const navigate = useNavigate();
 
-  // Show loading state
+  // If loading, show loading state
   if (loading) {
     return (
       <div className="flex h-screen w-full items-center justify-center">
@@ -21,7 +23,7 @@ const AppLayout = () => {
 
   // If user is not authenticated, redirect to login
   if (!currentUser) {
-    return <Navigate to="/login" />;
+    return <Navigate to="/login" replace />;
   }
 
   return (

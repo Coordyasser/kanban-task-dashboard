@@ -7,7 +7,7 @@ import { supabase } from '../integrations/supabase/client';
 interface AuthContextType {
   currentUser: User | null;
   login: (email: string, password: string) => Promise<boolean>;
-  logout: () => void;
+  logout: () => Promise<void>;
   register: (name: string, email: string, password: string, role: 'admin' | 'user') => Promise<boolean>;
   loading: boolean;
 }
@@ -18,46 +18,48 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // Verificar sessão atual ao iniciar
+  // Check session on initial load
   useEffect(() => {
     const checkSession = async () => {
       setLoading(true);
       
       try {
-        // Verificar se já existe uma sessão ativa
+        // Check for existing session
         const { data: { session } } = await supabase.auth.getSession();
         
         if (session) {
-          console.log("Sessão encontrada:", session.user.id);
+          console.log("Session found:", session.user.id);
           
-          // Buscar dados do perfil do usuário
+          // Fetch user profile data
           const { data: profileData, error: profileError } = await supabase
             .from('profiles')
             .select('*')
             .eq('id', session.user.id)
-            .single();
+            .maybeSingle();
           
           if (profileError) {
-            console.error('Erro ao buscar perfil:', profileError);
+            console.error('Error fetching profile:', profileError);
             throw profileError;
           }
           
           if (profileData) {
-            console.log("Perfil encontrado:", profileData);
+            console.log("Profile found:", profileData);
             const user: User = {
               id: profileData.id,
               name: profileData.name,
               email: profileData.email,
-              role: profileData.role,
+              role: profileData.role as 'admin' | 'user',
               avatar: profileData.avatar || undefined
             };
             
             setCurrentUser(user);
+          } else {
+            console.warn("No profile found for authenticated user");
           }
         }
       } catch (error) {
-        console.error('Erro na verificação da sessão:', error);
-        toast.error('Erro ao verificar a sessão');
+        console.error('Error checking session:', error);
+        toast.error('Error checking authentication session');
       } finally {
         setLoading(false);
       }
@@ -65,34 +67,45 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     
     checkSession();
 
-    // Configurar listener para mudanças de autenticação
+    // Set up auth state change listener
     const { data: authListener } = supabase.auth.onAuthStateChange(async (event, session) => {
-      console.log("Auth state changed:", event, session?.user.id);
+      console.log("Auth state changed:", event, session?.user?.id);
       
       if (event === 'SIGNED_IN' && session) {
-        // Buscar dados do perfil do usuário
-        const { data: profileData, error: profileError } = await supabase
-          .from('profiles')
-          .select('*')
-          .eq('id', session.user.id)
-          .single();
-        
-        if (!profileError && profileData) {
-          console.log("Perfil atualizado após sign in:", profileData);
-          const user: User = {
-            id: profileData.id,
-            name: profileData.name,
-            email: profileData.email,
-            role: profileData.role,
-            avatar: profileData.avatar || undefined
-          };
-          
-          setCurrentUser(user);
-        } else {
-          console.error('Erro ao buscar perfil após sign in:', profileError);
-        }
+        // Fetch profile data using a timeout to avoid deadlocks
+        setTimeout(async () => {
+          try {
+            const { data: profileData, error: profileError } = await supabase
+              .from('profiles')
+              .select('*')
+              .eq('id', session.user.id)
+              .maybeSingle();
+            
+            if (profileError) {
+              console.error('Error fetching profile after sign in:', profileError);
+              return;
+            }
+            
+            if (profileData) {
+              console.log("Profile updated after sign in:", profileData);
+              const user: User = {
+                id: profileData.id,
+                name: profileData.name,
+                email: profileData.email,
+                role: profileData.role as 'admin' | 'user',
+                avatar: profileData.avatar || undefined
+              };
+              
+              setCurrentUser(user);
+            } else {
+              console.warn("No profile found for authenticated user");
+            }
+          } catch (error) {
+            console.error('Error processing auth state change:', error);
+          }
+        }, 0);
       } else if (event === 'SIGNED_OUT') {
-        console.log("Usuário desconectado");
+        console.log("User signed out");
         setCurrentUser(null);
       }
     });
@@ -106,42 +119,46 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setLoading(true);
     
     try {
-      console.log("Tentando login com:", email);
+      console.log("Attempting login with:", email);
+      
+      // Clear any previous session first to prevent conflicts
+      await supabase.auth.signOut();
+      
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password
       });
       
       if (error) {
-        console.error("Erro ao fazer login:", error);
-        toast.error(error.message);
+        console.error("Login error:", error);
+        toast.error(error.message || 'Failed to login');
         return false;
       }
       
       if (data.user) {
-        toast.success('Login realizado com sucesso');
+        toast.success('Successfully logged in');
         return true;
       } else {
-        toast.error('Erro ao fazer login');
+        toast.error('Login failed');
         return false;
       }
     } catch (error: any) {
-      console.error("Exceção no login:", error);
-      toast.error('Erro ao fazer login: ' + error.message);
+      console.error("Exception during login:", error);
+      toast.error('Login error: ' + (error.message || 'Unknown error'));
       return false;
     } finally {
       setLoading(false);
     }
   };
 
-  const logout = async () => {
+  const logout = async (): Promise<void> => {
     try {
       await supabase.auth.signOut();
       setCurrentUser(null);
-      toast.info('Você saiu da sua conta');
+      toast.info('You have been signed out');
     } catch (error: any) {
-      console.error("Erro ao logout:", error);
-      toast.error('Erro ao sair: ' + error.message);
+      console.error("Logout error:", error);
+      toast.error('Error signing out: ' + (error.message || 'Unknown error'));
     }
   };
 
@@ -149,7 +166,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setLoading(true);
     
     try {
-      console.log("Tentando registrar:", email, "como", role);
+      console.log("Attempting to register:", email, "as", role);
+      
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
@@ -162,21 +180,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       });
       
       if (error) {
-        console.error("Erro ao registrar:", error);
-        toast.error(error.message);
+        console.error("Registration error:", error);
+        toast.error(error.message || 'Failed to create account');
         return false;
       }
       
       if (data.user) {
-        toast.success('Cadastro realizado com sucesso');
+        toast.success('Account created successfully');
         return true;
       } else {
-        toast.error('Erro ao criar conta');
+        toast.error('Failed to create account');
         return false;
       }
     } catch (error: any) {
-      console.error("Exceção no registro:", error);
-      toast.error('Erro ao criar conta: ' + error.message);
+      console.error("Exception during registration:", error);
+      toast.error('Registration error: ' + (error.message || 'Unknown error'));
       return false;
     } finally {
       setLoading(false);

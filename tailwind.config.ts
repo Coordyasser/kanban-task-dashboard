@@ -1,3 +1,4 @@
+
 import type { Config } from "tailwindcss";
 
 export default {
@@ -61,7 +62,15 @@ export default {
 					'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
-				}
+				},
+        kanban: {
+          'todo': '#1EAEDB',
+          'progress': '#0EA5E9',
+          'completed': '#10B981',
+          'todo-light': '#D3E4FD',
+          'progress-light': '#E0F2FE',
+          'completed-light': '#D1FAE5',
+        }
 			},
 			borderRadius: {
 				lg: 'var(--radius)',
@@ -84,12 +93,28 @@ export default {
 					to: {
 						height: '0'
 					}
-				}
+				},
+        'fade-in': {
+          '0%': {
+            opacity: '0',
+            transform: 'translateY(10px)'
+          },
+          '100%': {
+            opacity: '1',
+            transform: 'translateY(0)'
+          }
+        },
 			},
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
-				'accordion-up': 'accordion-up 0.2s ease-out'
-			}
+				'accordion-up': 'accordion-up 0.2s ease-out',
+        'fade-in': 'fade-in 0.3s ease-out',
+			},
+      backgroundImage: {
+        'blue-green-gradient': 'linear-gradient(90deg, hsla(199, 89%, 48%, 1) 0%, hsla(145, 63%, 42%, 1) 100%)',
+        'blue-gradient': 'linear-gradient(90deg, hsla(221, 45%, 73%, 1) 0%, hsla(220, 78%, 29%, 1) 100%)',
+        'green-gradient': 'linear-gradient(90deg, hsla(134, 50%, 85%, 1) 0%, hsla(134, 36%, 53%, 1) 100%)',
+      }
 		}
 	},
 	plugins: [require("tailwindcss-animate")],

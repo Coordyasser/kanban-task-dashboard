@@ -1,0 +1,103 @@
+
+import { User, Task } from "../types";
+
+// Mock users
+export const mockUsers: User[] = [
+  {
+    id: "1",
+    name: "John Admin",
+    email: "john@example.com",
+    role: "admin",
+    avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=John",
+  },
+  {
+    id: "2",
+    name: "Jane User",
+    email: "jane@example.com",
+    role: "user",
+    avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Jane",
+  },
+  {
+    id: "3",
+    name: "Bob Manager",
+    email: "bob@example.com",
+    role: "admin",
+    avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Bob",
+  },
+  {
+    id: "4",
+    name: "Alice Designer",
+    email: "alice@example.com",
+    role: "user",
+    avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Alice",
+  },
+];
+
+// Mock tasks
+export const mockTasks: Task[] = [
+  {
+    id: "101",
+    title: "Design new landing page",
+    description: "Create a modern landing page design for our product",
+    unit: "Marketing",
+    assignees: ["2", "4"],
+    startDate: "2023-05-01",
+    endDate: "2023-05-15",
+    status: "todo",
+    createdBy: "1",
+    observations: "",
+    createdAt: "2023-04-28",
+  },
+  {
+    id: "102",
+    title: "Implement authentication flow",
+    description: "Add login, registration and password reset functionality",
+    unit: "Development",
+    assignees: ["2"],
+    startDate: "2023-05-05",
+    endDate: "2023-05-20",
+    status: "progress",
+    createdBy: "3",
+    observations: "Working on the login component",
+    createdAt: "2023-04-29",
+  },
+  {
+    id: "103",
+    title: "Create content strategy",
+    description: "Define content plan for Q2 marketing campaigns",
+    unit: "Marketing",
+    assignees: ["4"],
+    startDate: "2023-05-10",
+    endDate: "2023-05-25",
+    status: "completed",
+    createdBy: "1",
+    observations: "Completed ahead of schedule",
+    createdAt: "2023-04-30",
+  },
+  {
+    id: "104",
+    title: "Bug fixes for mobile app",
+    description: "Address critical bugs in the mobile application",
+    unit: "Development",
+    assignees: ["2", "4"],
+    startDate: "2023-05-07",
+    endDate: "2023-05-14",
+    status: "progress",
+    createdBy: "3",
+    observations: "",
+    createdAt: "2023-05-01",
+  },
+  {
+    id: "105",
+    title: "User research interviews",
+    description: "Conduct interviews with key users for product feedback",
+    unit: "Research",
+    assignees: ["4"],
+    startDate: "2023-05-15",
+    endDate: "2023-05-30",
+    status: "todo",
+    createdBy: "1",
+    observations: "",
+    createdAt: "2023-05-02",
+  },
+];

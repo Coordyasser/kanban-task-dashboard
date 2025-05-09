@@ -43,14 +43,14 @@ const TaskDetailDialog = ({
 
   return (
     <Dialog open={!!task} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-lg glassmorphism max-h-[90vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-md md:max-w-lg glassmorphism max-h-[80vh] overflow-y-auto w-[95%] mx-auto">
         <DialogHeader>
           <DialogTitle>{task.title}</DialogTitle>
-          <DialogDescription>{task.description}</DialogDescription>
+          <DialogDescription className="overflow-hidden text-ellipsis">{task.description}</DialogDescription>
         </DialogHeader>
         
-        <div className="space-y-4 py-4">
-          <div className="grid grid-cols-2 gap-4">
+        <div className="space-y-3 py-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
               <Label className="text-sm">Unit</Label>
               <p className="font-medium">{task.unit}</p>
@@ -77,14 +77,14 @@ const TaskDetailDialog = ({
               onChange={(e) => setObservation(e.target.value)}
               className="mt-1"
               placeholder="Add your observations here..."
-              rows={4}
+              rows={3}
             />
           </div>
           
           <div>
             <Label className="text-sm">Assignees</Label>
             <div className="flex flex-wrap gap-2 mt-1">
-              {assignedUsers.map((user) => (
+              {assignedUsers.length > 0 ? assignedUsers.map((user) => (
                 <div key={user.id} className="flex items-center gap-1 bg-gray-100 px-2 py-1 rounded">
                   <Avatar className="h-5 w-5">
                     <AvatarImage src={user.avatar} alt={user.name} />
@@ -92,7 +92,9 @@ const TaskDetailDialog = ({
                   </Avatar>
                   <span className="text-sm">{user.name}</span>
                 </div>
-              ))}
+              )) : (
+                <span className="text-sm text-muted-foreground">No assignees</span>
+              )}
             </div>
           </div>
         </div>

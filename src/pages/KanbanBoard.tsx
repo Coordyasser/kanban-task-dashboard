@@ -8,17 +8,17 @@ import { toast } from "sonner";
 import TaskCard from "@/components/kanban/TaskCard";
 import KanbanColumn from "@/components/kanban/KanbanColumn";
 import TaskDetailDialog from "@/components/kanban/TaskDetailDialog";
-import CreateTaskDialog, { NewTaskData } from "@/components/kanban/CreateTaskDialog";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useNavigate } from "react-router-dom";
 
 const KanbanBoard = () => {
+  const navigate = useNavigate();
   const { currentUser } = useAuth();
-  const { getUserTasksByStatus, updateTaskStatus, updateTask, deleteTask, addTask, loading } = useTasks();
+  const { getUserTasksByStatus, updateTaskStatus, updateTask, deleteTask, loading } = useTasks();
   const [draggedTask, setDraggedTask] = useState<Task | null>(null);
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [observation, setObservation] = useState("");
-  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const isMobile = useIsMobile();
 
   const todoTasks = getUserTasksByStatus("todo");
@@ -61,14 +61,9 @@ const KanbanBoard = () => {
     }
   };
 
-  const handleCreateTask = (taskData: NewTaskData) => {
-    try {
-      addTask(taskData);
-      setIsCreateModalOpen(false);
-      toast.success("Task created successfully");
-    } catch (error) {
-      toast.error("Failed to create task");
-    }
+  // New function to navigate to the Add Task page
+  const handleNavigateToAddTask = () => {
+    navigate('/tasks/new');
   };
 
   if (loading) {
@@ -109,7 +104,7 @@ const KanbanBoard = () => {
           {currentUser?.role === 'admin' && (
             <Button 
               className="glassmorphism bg-primary/80 hover:bg-primary/90 rounded-full h-12 w-12 p-0 fixed bottom-6 right-6 md:static md:h-10 md:w-auto md:px-4 md:py-2 shadow-lg hover:shadow-xl transition-all duration-300 z-10"
-              onClick={() => setIsCreateModalOpen(true)}
+              onClick={handleNavigateToAddTask}
             >
               <Plus className="h-5 w-5 md:mr-2" />
               <span className="hidden md:inline">Create Task</span>
@@ -152,7 +147,7 @@ const KanbanBoard = () => {
           />
         </div>
         
-        {/* Dialogs */}
+        {/* Task Detail Dialog - Keep this for viewing task details */}
         <TaskDetailDialog
           task={selectedTask}
           observation={observation}
@@ -160,12 +155,6 @@ const KanbanBoard = () => {
           onClose={() => setSelectedTask(null)}
           onSave={handleSaveObservation}
           onDelete={handleDeleteTask}
-        />
-        
-        <CreateTaskDialog
-          isOpen={isCreateModalOpen}
-          onClose={() => setIsCreateModalOpen(false)}
-          onCreateTask={handleCreateTask}
         />
       </div>
     </div>

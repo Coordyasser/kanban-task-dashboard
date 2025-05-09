@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useTasks } from "@/contexts/TaskContext";
 import { TaskStatus, Task } from "@/types";
@@ -153,8 +152,8 @@ const KanbanBoard = () => {
           />
         </div>
         
-        {/* Dialogs positioned here for better z-index handling */}
-        <div className="relative z-50">
+        {/* Dialogs positioned with fixed z-index */}
+        <div className="relative z-[60]">
           <TaskDetailDialog
             task={selectedTask}
             observation={observation}

@@ -10,10 +10,11 @@ import TaskCard from "@/components/kanban/TaskCard";
 import KanbanColumn from "@/components/kanban/KanbanColumn";
 import TaskDetailDialog from "@/components/kanban/TaskDetailDialog";
 import CreateTaskDialog, { NewTaskData } from "@/components/kanban/CreateTaskDialog";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const KanbanBoard = () => {
   const { currentUser } = useAuth();
-  const { getUserTasksByStatus, updateTaskStatus, updateTask, deleteTask, addTask } = useTasks();
+  const { getUserTasksByStatus, updateTaskStatus, updateTask, deleteTask, addTask, loading } = useTasks();
   const [draggedTask, setDraggedTask] = useState<Task | null>(null);
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [observation, setObservation] = useState("");
@@ -67,17 +68,47 @@ const KanbanBoard = () => {
     }
   };
 
+  if (loading) {
+    return (
+      <div className="space-y-6">
+        <div className="flex justify-between items-center">
+          <Skeleton className="h-8 w-48" />
+          <Skeleton className="h-10 w-32" />
+        </div>
+        
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {[1, 2, 3].map((column) => (
+            <div key={column} className="bg-background/50 rounded-lg p-4 border border-border/50">
+              <div className="flex items-center justify-between mb-4">
+                <Skeleton className="h-6 w-24" />
+                <Skeleton className="h-6 w-6 rounded-full" />
+              </div>
+              
+              <div className="space-y-3">
+                {[1, 2, 3].map((task) => (
+                  <Skeleton key={task} className="h-32 w-full rounded-md" />
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">DPGEtask Kanban</h1>
-        <Button 
-          className="glassmorphism bg-primary/80 hover:bg-primary/90 rounded-full h-12 w-12 p-0 fixed bottom-6 right-6 md:static md:h-10 md:w-auto md:px-4 md:py-2 shadow-lg hover:shadow-xl transition-all duration-300 z-10"
-          onClick={() => setIsCreateModalOpen(true)}
-        >
-          <Plus className="h-5 w-5 md:mr-2" />
-          <span className="hidden md:inline">Create Task</span>
-        </Button>
+        {currentUser?.role === 'admin' && (
+          <Button 
+            className="glassmorphism bg-primary/80 hover:bg-primary/90 rounded-full h-12 w-12 p-0 fixed bottom-6 right-6 md:static md:h-10 md:w-auto md:px-4 md:py-2 shadow-lg hover:shadow-xl transition-all duration-300 z-10"
+            onClick={() => setIsCreateModalOpen(true)}
+          >
+            <Plus className="h-5 w-5 md:mr-2" />
+            <span className="hidden md:inline">Create Task</span>
+          </Button>
+        )}
       </div>
       
       <div className="kanban-board">

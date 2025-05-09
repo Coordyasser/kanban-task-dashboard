@@ -127,42 +127,45 @@ const KanbanBoard = () => {
         <div className="kanban-board">
           <KanbanColumn
             title="To Do"
-            tasks={todoTasks}
+            tasks={getUserTasksByStatus("todo")}
             status="todo"
             onDragOver={handleDragOver}
             onDrop={handleDrop}
             onTaskDragStart={handleDragStart}
             onTaskClick={handleTaskClick}
+            onTaskDelete={handleDeleteTask}
             emptyStateMessage={<p className="text-sm text-gray-500 text-center my-4">No tasks to do</p>}
             renderTask={renderTaskCard}
           />
           
           <KanbanColumn
             title="In Progress"
-            tasks={progressTasks}
+            tasks={getUserTasksByStatus("progress")}
             status="progress"
             onDragOver={handleDragOver}
             onDrop={handleDrop}
             onTaskDragStart={handleDragStart}
             onTaskClick={handleTaskClick}
+            onTaskDelete={handleDeleteTask}
             emptyStateMessage={<p className="text-sm text-gray-500 text-center my-4">No tasks in progress</p>}
             renderTask={renderTaskCard}
           />
           
           <KanbanColumn
             title="Completed"
-            tasks={completedTasks}
+            tasks={getUserTasksByStatus("completed")}
             status="completed"
             onDragOver={handleDragOver}
             onDrop={handleDrop}
             onTaskDragStart={handleDragStart}
             onTaskClick={handleTaskClick}
+            onTaskDelete={handleDeleteTask}
             emptyStateMessage={<p className="text-sm text-gray-500 text-center my-4">No completed tasks</p>}
             renderTask={renderTaskCard}
           />
         </div>
         
-        {/* Task Detail Dialog - Keep this for viewing task details */}
+        {/* Task Detail Dialog */}
         <TaskDetailDialog
           task={selectedTask}
           observation={observation}

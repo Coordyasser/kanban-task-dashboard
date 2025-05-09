@@ -11,6 +11,7 @@ interface KanbanColumnProps {
   onDrop: (status: TaskStatus) => void;
   onTaskDragStart: (task: Task) => void;
   onTaskClick: (task: Task) => void;
+  onTaskDelete?: (taskId: string) => void;
   emptyStateMessage?: ReactNode;
   renderTask?: (task: Task) => ReactNode;
 }
@@ -23,6 +24,7 @@ const KanbanColumn = ({
   onDrop,
   onTaskDragStart,
   onTaskClick,
+  onTaskDelete,
   emptyStateMessage,
   renderTask,
 }: KanbanColumnProps) => {
@@ -45,6 +47,7 @@ const KanbanColumn = ({
                 task={task}
                 onDragStart={onTaskDragStart}
                 onClick={onTaskClick}
+                onDelete={onTaskDelete}
               />
             )
           ))

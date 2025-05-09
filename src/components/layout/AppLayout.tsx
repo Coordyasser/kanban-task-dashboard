@@ -12,6 +12,7 @@ const AppLayout = () => {
   useEffect(() => {
     // If not authenticated after loading, redirect to login
     if (!loading && !currentUser) {
+      console.log("User not authenticated, redirecting to login");
       navigate("/login", { replace: true });
     }
   }, [currentUser, loading, navigate]);

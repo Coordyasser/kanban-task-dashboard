@@ -18,6 +18,7 @@ const Login = () => {
   // Redirect if already logged in
   useEffect(() => {
     if (currentUser) {
+      console.log("User already logged in, redirecting to dashboard");
       navigate("/dashboard", { replace: true });
     }
   }, [currentUser, navigate]);
@@ -33,7 +34,10 @@ const Login = () => {
         return;
       }
       
+      console.log("Attempting login...");
       const success = await login(email, password);
+      console.log("Login result:", success);
+      
       if (success) {
         toast.success("Login successful");
         // Explicitly redirect to dashboard after successful login

@@ -137,9 +137,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       
       if (data.user) {
         // Successfully authenticated, return true so the Login component can handle navigation
-        toast.success('Successfully logged in');
+        console.log("Login successful, user ID:", data.user.id);
+        
+        // We don't need to set the currentUser here as the onAuthStateChange event will handle it
         return true;
       } else {
+        console.error("No user returned from login attempt");
         toast.error('Login failed');
         return false;
       }

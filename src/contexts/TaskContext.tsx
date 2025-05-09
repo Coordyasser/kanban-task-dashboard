@@ -3,7 +3,7 @@ import { createContext, useContext, useState, useEffect, ReactNode } from 'react
 import { Task, TaskStatus, User } from '../types';
 import { mockTasks } from '../services/mockData';
 import { toast } from 'sonner';
-import { useAuth } from './AuthContext';
+import { useAuth } from './auth';
 import { supabase } from '@/integrations/supabase/client';
 
 interface TaskContextType {

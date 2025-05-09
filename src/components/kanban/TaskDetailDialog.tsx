@@ -1,7 +1,7 @@
 
 import { Task } from "@/types";
 import { useUsers } from "@/contexts/UserContext";
-import { useAuth } from "@/contexts/AuthContext";
+import { useAuth } from "@/contexts/auth";
 import {
   Dialog,
   DialogContent,

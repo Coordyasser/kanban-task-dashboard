@@ -3,7 +3,7 @@ import { useState } from "react";
 import { useTasks } from "@/contexts/TaskContext";
 import { TaskStatus, Task } from "@/types";
 import { Button } from "@/components/ui/button";
-import { useAuth } from "@/contexts/AuthContext";
+import { useAuth } from "@/contexts/auth";
 import { Plus } from "lucide-react";
 import { toast } from "sonner";
 import TaskCard from "@/components/kanban/TaskCard";

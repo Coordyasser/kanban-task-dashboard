@@ -43,34 +43,34 @@ const TaskDetailDialog = ({
 
   return (
     <Dialog open={!!task} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-md md:max-w-lg glassmorphism max-h-[80vh] overflow-y-auto w-[95%] mx-auto">
+      <DialogContent className="w-[95%] max-w-sm sm:max-w-md md:max-w-lg glassmorphism max-h-[85vh] overflow-y-auto mx-auto">
         <DialogHeader>
-          <DialogTitle>{task.title}</DialogTitle>
-          <DialogDescription className="overflow-hidden text-ellipsis">{task.description}</DialogDescription>
+          <DialogTitle className="mb-1 line-clamp-2">{task.title}</DialogTitle>
+          <DialogDescription className="line-clamp-3">{task.description}</DialogDescription>
         </DialogHeader>
         
-        <div className="space-y-3 py-3">
+        <div className="space-y-3 py-2">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
-              <Label className="text-sm">Unit</Label>
-              <p className="font-medium">{task.unit}</p>
+              <Label className="text-sm font-medium">Unit</Label>
+              <p className="mt-1 text-sm">{task.unit}</p>
             </div>
             <div>
-              <Label className="text-sm">Status</Label>
-              <p className="font-medium capitalize">{task.status}</p>
+              <Label className="text-sm font-medium">Status</Label>
+              <p className="mt-1 text-sm capitalize">{task.status}</p>
             </div>
             <div>
-              <Label className="text-sm">Start Date</Label>
-              <p className="font-medium">{task.startDate}</p>
+              <Label className="text-sm font-medium">Start Date</Label>
+              <p className="mt-1 text-sm">{task.startDate}</p>
             </div>
             <div>
-              <Label className="text-sm">End Date</Label>
-              <p className="font-medium">{task.endDate}</p>
+              <Label className="text-sm font-medium">End Date</Label>
+              <p className="mt-1 text-sm">{task.endDate}</p>
             </div>
           </div>
           
           <div>
-            <Label className="text-sm" htmlFor="observation">Observations</Label>
+            <Label className="text-sm font-medium" htmlFor="observation">Observations</Label>
             <Textarea
               id="observation"
               value={observation}
@@ -82,7 +82,7 @@ const TaskDetailDialog = ({
           </div>
           
           <div>
-            <Label className="text-sm">Assignees</Label>
+            <Label className="text-sm font-medium">Assignees</Label>
             <div className="flex flex-wrap gap-2 mt-1">
               {assignedUsers.length > 0 ? assignedUsers.map((user) => (
                 <div key={user.id} className="flex items-center gap-1 bg-gray-100 px-2 py-1 rounded">
@@ -99,14 +99,14 @@ const TaskDetailDialog = ({
           </div>
         </div>
         
-        <DialogFooter className="sm:justify-between">
+        <DialogFooter className="gap-2 sm:justify-between">
           {isAdmin && (
-            <Button variant="destructive" size="sm" onClick={onDelete}>
+            <Button variant="destructive" size="sm" onClick={onDelete} className="w-full sm:w-auto">
               <Trash className="h-4 w-4 mr-1" />
               Delete Task
             </Button>
           )}
-          <Button onClick={onSave}>
+          <Button onClick={onSave} className="w-full sm:w-auto">
             <Pencil className="h-4 w-4 mr-1" />
             Save Observations
           </Button>

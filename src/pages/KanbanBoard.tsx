@@ -11,6 +11,7 @@ import KanbanColumn from "@/components/kanban/KanbanColumn";
 import TaskDetailDialog from "@/components/kanban/TaskDetailDialog";
 import CreateTaskDialog, { NewTaskData } from "@/components/kanban/CreateTaskDialog";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const KanbanBoard = () => {
   const { currentUser } = useAuth();
@@ -19,6 +20,7 @@ const KanbanBoard = () => {
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [observation, setObservation] = useState("");
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const isMobile = useIsMobile();
 
   const todoTasks = getUserTasksByStatus("todo");
   const progressTasks = getUserTasksByStatus("progress");
@@ -48,6 +50,7 @@ const KanbanBoard = () => {
     if (selectedTask) {
       updateTask(selectedTask.id, { observations: observation });
       setSelectedTask(null);
+      toast.success("Observations saved");
     }
   };
 
@@ -55,6 +58,7 @@ const KanbanBoard = () => {
     if (selectedTask) {
       deleteTask(selectedTask.id);
       setSelectedTask(null);
+      toast.success("Task deleted");
     }
   };
 
@@ -99,10 +103,10 @@ const KanbanBoard = () => {
   }
 
   return (
-    <div className="flex flex-col h-full w-full pt-6">
+    <div className="flex flex-col h-full w-full pt-4">
       <div className="w-full">
         <div className="flex justify-between items-center mb-6">
-          <h1 className="text-2xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">DPGEtask Kanban</h1>
+          <h1 className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">DPGEtask Kanban</h1>
           {currentUser?.role === 'admin' && (
             <Button 
               className="glassmorphism bg-primary/80 hover:bg-primary/90 rounded-full h-12 w-12 p-0 fixed bottom-6 right-6 md:static md:h-10 md:w-auto md:px-4 md:py-2 shadow-lg hover:shadow-xl transition-all duration-300 z-10"

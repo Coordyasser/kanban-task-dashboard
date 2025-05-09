@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { format } from "date-fns";
 import {
@@ -131,7 +130,7 @@ const CreateTaskDialog = ({ isOpen, onClose, onCreateTask }: CreateTaskDialogPro
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-lg glassmorphism">
+      <DialogContent className="sm:max-w-lg glassmorphism max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Criar Nova Tarefa</DialogTitle>
           <DialogDescription>Adicionar uma nova tarefa ao quadro kanban</DialogDescription>

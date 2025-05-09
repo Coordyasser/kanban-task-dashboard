@@ -70,8 +70,8 @@ const KanbanBoard = () => {
 
   if (loading) {
     return (
-      <div className="flex flex-col h-full justify-center items-center">
-        <div className="space-y-6 w-full max-w-5xl">
+      <div className="flex flex-col h-full w-full pt-6">
+        <div className="space-y-6 w-full">
           <div className="flex justify-between items-center">
             <Skeleton className="h-8 w-48" />
             <Skeleton className="h-10 w-32" />
@@ -99,8 +99,8 @@ const KanbanBoard = () => {
   }
 
   return (
-    <div className="flex flex-col h-full justify-center items-center">
-      <div className="w-full max-w-5xl">
+    <div className="flex flex-col h-full w-full pt-6">
+      <div className="w-full">
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-2xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">DPGEtask Kanban</h1>
           {currentUser?.role === 'admin' && (

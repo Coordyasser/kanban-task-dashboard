@@ -43,7 +43,7 @@ const TaskDetailDialog = ({
 
   return (
     <Dialog open={!!task} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-lg glassmorphism fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[95%] max-h-[90vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-lg glassmorphism">
         <DialogHeader>
           <DialogTitle>{task.title}</DialogTitle>
           <DialogDescription>{task.description}</DialogDescription>

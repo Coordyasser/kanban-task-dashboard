@@ -60,17 +60,17 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "task_assignments_task_id_fkey"
-            columns: ["task_id"]
-            isOneToOne: false
-            referencedRelation: "tasks"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "task_assignments_user_id_fkey"
+            foreignKeyName: "fk_task_assignments_profiles"
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_task_assignments_tasks"
+            columns: ["task_id"]
+            isOneToOne: false
+            referencedRelation: "tasks"
             referencedColumns: ["id"]
           },
         ]
@@ -117,7 +117,7 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "tasks_created_by_fkey"
+            foreignKeyName: "fk_tasks_profiles"
             columns: ["created_by"]
             isOneToOne: false
             referencedRelation: "profiles"
@@ -125,12 +125,47 @@ export type Database = {
           },
         ]
       }
+      user_creation_logs: {
+        Row: {
+          created_at: string | null
+          email: string | null
+          error_message: string | null
+          id: string
+          raw_metadata: Json | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          email?: string | null
+          error_message?: string | null
+          id?: string
+          raw_metadata?: Json | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          email?: string | null
+          error_message?: string | null
+          id?: string
+          raw_metadata?: Json | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      check_users_without_profiles: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          user_id: string
+          email: string
+          created_at: string
+          error_message: string
+        }[]
+      }
     }
     Enums: {
       task_status: "todo" | "progress" | "completed"

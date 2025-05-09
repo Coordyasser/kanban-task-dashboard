@@ -46,16 +46,16 @@ const Dashboard = () => {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">Dashboard</h1>
+        <h1 className="text-2xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">DPGEtask Dashboard</h1>
         {isAdmin && (
-          <Button asChild>
+          <Button asChild className="glassmorphism bg-primary/80 hover:bg-primary/90">
             <Link to="/tasks/new">Create New Task</Link>
           </Button>
         )}
       </div>
       
       <div className="grid gap-6 grid-cols-1 md:grid-cols-3">
-        <Card>
+        <Card className="glassmorphism">
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium">Total Tasks</CardTitle>
           </CardHeader>
@@ -67,7 +67,7 @@ const Dashboard = () => {
           </CardContent>
         </Card>
         
-        <Card>
+        <Card className="glassmorphism">
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium">In Progress</CardTitle>
           </CardHeader>
@@ -81,7 +81,7 @@ const Dashboard = () => {
           </CardContent>
         </Card>
         
-        <Card>
+        <Card className="glassmorphism">
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium">Completed</CardTitle>
           </CardHeader>
@@ -97,7 +97,7 @@ const Dashboard = () => {
       </div>
       
       <div className="grid gap-6 grid-cols-1 md:grid-cols-2">
-        <Card>
+        <Card className="glassmorphism">
           <CardHeader>
             <CardTitle>Task Status Distribution</CardTitle>
             <CardDescription>Breakdown of tasks by current status</CardDescription>
@@ -129,7 +129,7 @@ const Dashboard = () => {
         </Card>
         
         {isAdmin && (
-          <Card>
+          <Card className="glassmorphism">
             <CardHeader>
               <CardTitle>User Task Progress</CardTitle>
               <CardDescription>Task completion rate by user</CardDescription>
@@ -151,7 +151,7 @@ const Dashboard = () => {
       </div>
       
       <div>
-        <Card>
+        <Card className="glassmorphism">
           <CardHeader>
             <CardTitle>Recent Tasks</CardTitle>
             <CardDescription>Your most recent tasks</CardDescription>
@@ -192,7 +192,7 @@ const Dashboard = () => {
             </div>
             
             <div className="mt-4">
-              <Button asChild variant="outline" size="sm">
+              <Button asChild variant="outline" size="sm" className="glassmorphism">
                 <Link to="/kanban">View All Tasks</Link>
               </Button>
             </div>

@@ -22,7 +22,7 @@ const Sidebar = () => {
       <div className="flex items-center justify-between mb-6">
         {!collapsed && (
           <h1 className="text-xl font-bold">
-            Task<span className="text-primary">Master</span>
+            DPGE<span className="text-primary">task</span>
           </h1>
         )}
         <Button

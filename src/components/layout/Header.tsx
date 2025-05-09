@@ -24,9 +24,9 @@ const Header = () => {
   };
   
   return (
-    <header className="sticky top-0 z-10 bg-white border-b px-4 py-2 flex justify-between items-center">
+    <header className="sticky top-0 z-10 bg-white/70 backdrop-blur-md border-b px-4 py-2 flex justify-between items-center">
       <div className="flex items-center md:hidden">
-        <h1 className="text-xl font-semibold">Kanban Dashboard</h1>
+        <h1 className="text-xl font-semibold">DPGEtask</h1>
       </div>
       
       <div className="flex-1" />

@@ -4,6 +4,7 @@ import { Task, TaskStatus, User } from '../types';
 import { mockTasks } from '../services/mockData';
 import { toast } from 'sonner';
 import { useAuth } from './AuthContext';
+import { supabase } from '@/integrations/supabase/client';
 
 interface TaskContextType {
   tasks: Task[];
@@ -41,7 +42,7 @@ export function TaskProvider({ children }: { children: ReactNode }) {
 
   const addTask = (taskData: Omit<Task, 'id' | 'createdAt' | 'createdBy'>) => {
     if (!currentUser || currentUser.role !== 'admin') {
-      toast.error('Only admins can create tasks');
+      toast.error('Apenas administradores podem criar tarefas');
       return;
     }
 
@@ -53,7 +54,7 @@ export function TaskProvider({ children }: { children: ReactNode }) {
     };
 
     setTasks([...tasks, newTask]);
-    toast.success('Task created successfully');
+    toast.success('Tarefa criada com sucesso');
   };
 
   const updateTask = (id: string, updates: Partial<Task>) => {
@@ -63,7 +64,7 @@ export function TaskProvider({ children }: { children: ReactNode }) {
     const updatedTasks = [...tasks];
     updatedTasks[taskIndex] = { ...updatedTasks[taskIndex], ...updates };
     setTasks(updatedTasks);
-    toast.success('Task updated successfully');
+    toast.success('Tarefa atualizada com sucesso');
   };
 
   const updateTaskStatus = (id: string, status: TaskStatus) => {
@@ -72,12 +73,12 @@ export function TaskProvider({ children }: { children: ReactNode }) {
 
   const deleteTask = (id: string) => {
     if (!currentUser || currentUser.role !== 'admin') {
-      toast.error('Only admins can delete tasks');
+      toast.error('Apenas administradores podem excluir tarefas');
       return;
     }
 
     setTasks(tasks.filter(task => task.id !== id));
-    toast.success('Task deleted');
+    toast.success('Tarefa excluída');
   };
 
   const getTaskById = (id: string) => {

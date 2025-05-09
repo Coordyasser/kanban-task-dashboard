@@ -152,23 +152,21 @@ const KanbanBoard = () => {
           />
         </div>
         
-        {/* Dialogs positioned with fixed z-index */}
-        <div className="relative z-[60]">
-          <TaskDetailDialog
-            task={selectedTask}
-            observation={observation}
-            setObservation={setObservation}
-            onClose={() => setSelectedTask(null)}
-            onSave={handleSaveObservation}
-            onDelete={handleDeleteTask}
-          />
-          
-          <CreateTaskDialog
-            isOpen={isCreateModalOpen}
-            onClose={() => setIsCreateModalOpen(false)}
-            onCreateTask={handleCreateTask}
-          />
-        </div>
+        {/* Dialogs */}
+        <TaskDetailDialog
+          task={selectedTask}
+          observation={observation}
+          setObservation={setObservation}
+          onClose={() => setSelectedTask(null)}
+          onSave={handleSaveObservation}
+          onDelete={handleDeleteTask}
+        />
+        
+        <CreateTaskDialog
+          isOpen={isCreateModalOpen}
+          onClose={() => setIsCreateModalOpen(false)}
+          onCreateTask={handleCreateTask}
+        />
       </div>
     </div>
   );

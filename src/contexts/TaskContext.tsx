@@ -50,11 +50,12 @@ export function TaskProvider({ children }: { children: ReactNode }) {
             .eq('created_by', currentUser.id);
         } else {
           // Regular users see tasks they are assigned to
+          // Using !inner to ensure we only get tasks that have assignments to this user
           query = supabase
             .from('tasks')
             .select(`
               *,
-              task_assignments!inner(user_id)
+              task_assignments(user_id)
             `)
             .eq('task_assignments.user_id', currentUser.id);
         }
@@ -67,6 +68,7 @@ export function TaskProvider({ children }: { children: ReactNode }) {
           // Fall back to mock data
           setTasks(mockTasks);
         } else if (data) {
+          console.log("Tasks fetched successfully:", data);
           // Transform the data to match our Task type
           const formattedTasks: Task[] = data.map(task => ({
             id: task.id,

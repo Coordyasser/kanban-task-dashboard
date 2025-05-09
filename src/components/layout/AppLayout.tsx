@@ -9,6 +9,13 @@ const AppLayout = () => {
   const { currentUser, loading } = useAuth();
   const navigate = useNavigate();
 
+  useEffect(() => {
+    // If not authenticated after loading, redirect to login
+    if (!loading && !currentUser) {
+      navigate("/login", { replace: true });
+    }
+  }, [currentUser, loading, navigate]);
+
   // If loading, show loading state
   if (loading) {
     return (

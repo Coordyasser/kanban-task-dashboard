@@ -29,11 +29,14 @@ const Login = () => {
     try {
       if (!email || !password) {
         toast.error("Please enter both email and password");
+        setIsSubmitting(false);
         return;
       }
       
       const success = await login(email, password);
       if (success) {
+        toast.success("Login successful");
+        // Explicitly redirect to dashboard after successful login
         navigate("/dashboard", { replace: true });
       }
     } catch (error: any) {

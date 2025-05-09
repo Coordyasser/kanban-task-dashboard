@@ -136,6 +136,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
       
       if (data.user) {
+        // Successfully authenticated, return true so the Login component can handle navigation
         toast.success('Successfully logged in');
         return true;
       } else {

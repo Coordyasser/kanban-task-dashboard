@@ -1,4 +1,3 @@
-
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { Task, TaskStatus, User } from '../types';
 import { mockTasks } from '../services/mockData';
@@ -27,7 +26,7 @@ export function TaskProvider({ children }: { children: ReactNode }) {
   const { currentUser } = useAuth();
 
   useEffect(() => {
-    // Skip fetching if no user is logged in
+    // Pula a busca se nenhum usuário estiver logado
     if (!currentUser) {
       setTasks([]);
       setLoading(false);
@@ -40,7 +39,7 @@ export function TaskProvider({ children }: { children: ReactNode }) {
         let query;
         
         if (currentUser.role === 'admin') {
-          // Admins see tasks they created
+          // Admins veem tarefas que eles criaram
           query = supabase
             .from('tasks')
             .select(`
@@ -49,8 +48,7 @@ export function TaskProvider({ children }: { children: ReactNode }) {
             `)
             .eq('created_by', currentUser.id);
         } else {
-          // Regular users see tasks they are assigned to
-          // Using !inner to ensure we only get tasks that have assignments to this user
+          // Usuários regulares veem tarefas às quais foram atribuídos
           query = supabase
             .from('tasks')
             .select(`
@@ -63,13 +61,13 @@ export function TaskProvider({ children }: { children: ReactNode }) {
         const { data, error } = await query;
 
         if (error) {
-          console.error("Error fetching tasks:", error);
-          toast.error('Failed to load tasks');
-          // Fall back to mock data
+          console.error("Erro ao buscar tarefas:", error);
+          toast.error('Falha ao carregar tarefas');
+          // Usa dados simulados como fallback
           setTasks(mockTasks);
         } else if (data) {
-          console.log("Tasks fetched successfully:", data);
-          // Transform the data to match our Task type
+          console.log("Tarefas buscadas com sucesso:", data);
+          // Transforma os dados para corresponder ao nosso tipo Task
           const formattedTasks: Task[] = data.map(task => ({
             id: task.id,
             title: task.title,
@@ -87,9 +85,9 @@ export function TaskProvider({ children }: { children: ReactNode }) {
           setTasks(formattedTasks);
         }
       } catch (error) {
-        console.error("Error in task fetching:", error);
-        toast.error('Error loading tasks');
-        // Fall back to mock data
+        console.error("Erro na busca de tarefas:", error);
+        toast.error('Erro ao carregar tarefas');
+        // Usa dados simulados como fallback
         setTasks(mockTasks);
       } finally {
         setLoading(false);
@@ -99,7 +97,7 @@ export function TaskProvider({ children }: { children: ReactNode }) {
     fetchTasks();
   }, [currentUser]);
 
-  // Filter tasks for the current user
+  // Filtra tarefas para o usuário atual
   const userTasks = tasks;
 
   const addTask = async (taskData: Omit<Task, 'id' | 'createdAt' | 'createdBy'>) => {
@@ -109,7 +107,7 @@ export function TaskProvider({ children }: { children: ReactNode }) {
     }
 
     try {
-      // First, insert the task
+      // Primeiro, insere a tarefa
       const taskToInsert = {
         title: taskData.title,
         description: taskData.description,
@@ -128,7 +126,7 @@ export function TaskProvider({ children }: { children: ReactNode }) {
 
       if (taskError) throw taskError;
 
-      // Then, create the assignments
+      // Então, cria as atribuições
       const assignments = taskData.assignees.map((userId: string) => ({
         task_id: insertedTask.id,
         user_id: userId
@@ -140,7 +138,7 @@ export function TaskProvider({ children }: { children: ReactNode }) {
 
       if (assignmentError) throw assignmentError;
 
-      // Refetch tasks to get the updated list
+      // Recarrega as tarefas para obter a lista atualizada
       const { data: updatedTasks, error: fetchError } = await supabase
         .from('tasks')
         .select(`
@@ -151,7 +149,7 @@ export function TaskProvider({ children }: { children: ReactNode }) {
 
       if (fetchError) throw fetchError;
 
-      // Transform the data to match our Task type
+      // Transforma os dados para corresponder ao nosso tipo Task
       const formattedTasks: Task[] = updatedTasks.map(task => ({
         id: task.id,
         title: task.title,
@@ -169,8 +167,8 @@ export function TaskProvider({ children }: { children: ReactNode }) {
       setTasks(formattedTasks);
       toast.success('Tarefa criada com sucesso');
     } catch (error) {
-      console.error("Error creating task:", error);
-      toast.error('Failed to create task');
+      console.error("Erro ao criar tarefa:", error);
+      toast.error('Falha ao criar tarefa');
     }
   };
 
@@ -195,7 +193,7 @@ export function TaskProvider({ children }: { children: ReactNode }) {
       }
 
       if (updates.assignees) {
-        // First delete existing assignments
+        // Primeiro deleta as atribuições existentes
         const { error: deleteError } = await supabase
           .from('task_assignments')
           .delete()
@@ -203,7 +201,7 @@ export function TaskProvider({ children }: { children: ReactNode }) {
 
         if (deleteError) throw deleteError;
 
-        // Then create new assignments
+        // Então cria as novas atribuições
         const assignments = updates.assignees.map(userId => ({
           task_id: id,
           user_id: userId
@@ -218,7 +216,7 @@ export function TaskProvider({ children }: { children: ReactNode }) {
         }
       }
 
-      // Refetch tasks to get the updated list
+      // Recarrega as tarefas para obter a lista atualizada
       if (currentUser) {
         let query;
         
@@ -263,8 +261,8 @@ export function TaskProvider({ children }: { children: ReactNode }) {
 
       toast.success('Tarefa atualizada com sucesso');
     } catch (error) {
-      console.error("Error updating task:", error);
-      toast.error('Failed to update task');
+      console.error("Erro ao atualizar tarefa:", error);
+      toast.error('Falha ao atualizar tarefa');
     }
   };
 
@@ -279,7 +277,7 @@ export function TaskProvider({ children }: { children: ReactNode }) {
     }
 
     try {
-      // Delete assignments first (due to foreign key constraints)
+      // Deleta as atribuições primeiro (devido às restrições de chave estrangeira)
       const { error: assignmentError } = await supabase
         .from('task_assignments')
         .delete()
@@ -287,7 +285,7 @@ export function TaskProvider({ children }: { children: ReactNode }) {
 
       if (assignmentError) throw assignmentError;
 
-      // Then delete the task
+      // Então deleta a tarefa
       const { error } = await supabase
         .from('tasks')
         .delete()
@@ -295,12 +293,12 @@ export function TaskProvider({ children }: { children: ReactNode }) {
 
       if (error) throw error;
 
-      // Update local state
+      // Atualiza o estado local
       setTasks(tasks.filter(task => task.id !== id));
       toast.success('Tarefa excluída');
     } catch (error) {
-      console.error("Error deleting task:", error);
-      toast.error('Failed to delete task');
+      console.error("Erro ao excluir tarefa:", error);
+      toast.error('Falha ao excluir tarefa');
     }
   };
 
@@ -339,7 +337,7 @@ export function TaskProvider({ children }: { children: ReactNode }) {
 export function useTasks() {
   const context = useContext(TaskContext);
   if (context === undefined) {
-    throw new Error('useTasks must be used within a TaskProvider');
+    throw new Error('useTasks deve ser usado dentro de um TaskProvider');
   }
   return context;
 }

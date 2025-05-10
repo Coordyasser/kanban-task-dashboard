@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useTasks } from "@/contexts/TaskContext";
 import { TaskStatus, Task } from "@/types";
@@ -49,20 +50,20 @@ const KanbanBoard = () => {
     if (selectedTask) {
       updateTask(selectedTask.id, { observations: observation });
       setSelectedTask(null);
-      toast.success("Observations saved");
+      toast.success("Observações salvas");
     }
   };
 
   const handleDeleteTask = (taskId: string) => {
     deleteTask(taskId);
-    // If the deleted task is currently selected, close the detail dialog
+    // Se a tarefa excluída estiver selecionada, fecha o diálogo de detalhes
     if (selectedTask && selectedTask.id === taskId) {
       setSelectedTask(null);
     }
-    toast.success("Task deleted");
+    toast.success("Tarefa excluída");
   };
 
-  // Navigate to the Add Task page
+  // Navega para a página de Adicionar Tarefa
   const handleNavigateToAddTask = () => {
     navigate('/tasks/new');
   };
@@ -97,7 +98,7 @@ const KanbanBoard = () => {
     );
   }
 
-  // Helper function to render task cards with delete button
+  // Função auxiliar para renderizar cartões de tarefas com botão de excluir
   const renderTaskCard = (task: Task) => (
     <TaskCard 
       key={task.id}
@@ -119,14 +120,14 @@ const KanbanBoard = () => {
               onClick={handleNavigateToAddTask}
             >
               <Plus className="h-5 w-5 md:mr-2" />
-              <span className="hidden md:inline">Create Task</span>
+              <span className="hidden md:inline">Criar Tarefa</span>
             </Button>
           )}
         </div>
         
         <div className="kanban-board">
           <KanbanColumn
-            title="To Do"
+            title="A Fazer"
             tasks={getUserTasksByStatus("todo")}
             status="todo"
             onDragOver={handleDragOver}
@@ -134,12 +135,12 @@ const KanbanBoard = () => {
             onTaskDragStart={handleDragStart}
             onTaskClick={handleTaskClick}
             onTaskDelete={handleDeleteTask}
-            emptyStateMessage={<p className="text-sm text-gray-500 text-center my-4">No tasks to do</p>}
+            emptyStateMessage={<p className="text-sm text-gray-500 text-center my-4">Nenhuma tarefa a fazer</p>}
             renderTask={renderTaskCard}
           />
           
           <KanbanColumn
-            title="In Progress"
+            title="Em Progresso"
             tasks={getUserTasksByStatus("progress")}
             status="progress"
             onDragOver={handleDragOver}
@@ -147,12 +148,12 @@ const KanbanBoard = () => {
             onTaskDragStart={handleDragStart}
             onTaskClick={handleTaskClick}
             onTaskDelete={handleDeleteTask}
-            emptyStateMessage={<p className="text-sm text-gray-500 text-center my-4">No tasks in progress</p>}
+            emptyStateMessage={<p className="text-sm text-gray-500 text-center my-4">Nenhuma tarefa em progresso</p>}
             renderTask={renderTaskCard}
           />
           
           <KanbanColumn
-            title="Completed"
+            title="Concluído"
             tasks={getUserTasksByStatus("completed")}
             status="completed"
             onDragOver={handleDragOver}
@@ -160,12 +161,12 @@ const KanbanBoard = () => {
             onTaskDragStart={handleDragStart}
             onTaskClick={handleTaskClick}
             onTaskDelete={handleDeleteTask}
-            emptyStateMessage={<p className="text-sm text-gray-500 text-center my-4">No completed tasks</p>}
+            emptyStateMessage={<p className="text-sm text-gray-500 text-center my-4">Nenhuma tarefa concluída</p>}
             renderTask={renderTaskCard}
           />
         </div>
         
-        {/* Task Detail Dialog */}
+        {/* Diálogo de Detalhes da Tarefa */}
         <TaskDetailDialog
           task={selectedTask}
           observation={observation}

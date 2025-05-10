@@ -26,22 +26,35 @@ export function useDebugInfo() {
             databaseInfo: null,
             error: `Erro de conexão: ${error.message}`
           });
-        } else {
-          // Busca informações adicionais do banco de dados
-          const { data: tables } = await supabase
-            .rpc('get_table_info')
-            .catch(() => ({ data: null }));
-          
-          setDebugInfo({
-            connectionStatus: 'connected',
-            databaseInfo: {
-              responseTime: end - start,
-              tables: tables || 'Não disponível',
-              lastChecked: new Date().toISOString()
-            },
-            error: null
-          });
+          return;
         }
+        
+        // Busca informações adicionais do banco de dados usando a função SQL get_simple_table_info
+        // Esta função está definida no arquivo debug_functions.sql
+        let tablesInfo = null;
+        
+        try {
+          const { data: tableData, error: tableError } = await supabase
+            .rpc('get_simple_table_info');
+            
+          if (!tableError && tableData) {
+            tablesInfo = tableData;
+          } else if (tableError) {
+            console.error('Erro ao buscar informações das tabelas:', tableError);
+          }
+        } catch (err) {
+          console.error('Falha ao chamar get_simple_table_info:', err);
+        }
+        
+        setDebugInfo({
+          connectionStatus: 'connected',
+          databaseInfo: {
+            responseTime: end - start,
+            tables: tablesInfo || 'Não disponível',
+            lastChecked: new Date().toISOString()
+          },
+          error: null
+        });
       } catch (err: any) {
         setDebugInfo({
           connectionStatus: 'error',

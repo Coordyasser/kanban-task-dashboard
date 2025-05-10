@@ -23,6 +23,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
     const fetchUsers = async () => {
       setLoading(true);
       try {
+        console.log("Buscando todos os usuários/perfis");
         // Tenta buscar usuários do Supabase
         const { data: profiles, error } = await supabase
           .from('profiles')
@@ -30,24 +31,30 @@ export function UserProvider({ children }: { children: ReactNode }) {
         
         if (error) {
           console.error("Erro ao buscar perfis de usuário:", error);
+          toast.error('Erro ao carregar perfis de usuários: ' + error.message);
           // Fallback para dados simulados
           setUsers(mockUsers);
-        } else if (profiles) {
-          console.log("Perfis de usuários carregados:", profiles);
+        } else if (profiles && profiles.length > 0) {
+          console.log("Perfis de usuários carregados:", profiles.length, "perfis encontrados");
+          
           // Converte perfis para o formato User
           const formattedUsers: User[] = profiles.map(profile => ({
             id: profile.id,
-            name: profile.name,
-            email: profile.email,
-            role: profile.role,
+            name: profile.name || 'Usuário sem nome',
+            email: profile.email || 'sem-email',
+            role: profile.role || 'user',
             avatar: profile.avatar
           }));
           
+          console.log("Usuários formatados:", formattedUsers);
           setUsers(formattedUsers);
+        } else {
+          console.warn("Nenhum perfil encontrado no banco de dados");
+          setUsers([]);
         }
-      } catch (error) {
+      } catch (error: any) {
         console.error("Erro ao buscar usuários:", error);
-        toast.error('Erro ao carregar usuários');
+        toast.error('Erro ao carregar usuários: ' + (error.message || 'Erro desconhecido'));
         // Usa dados simulados como fallback
         setUsers(mockUsers);
       } finally {
@@ -66,10 +73,10 @@ export function UserProvider({ children }: { children: ReactNode }) {
     if (!ids || ids.length === 0) return [];
     
     console.log("Buscando usuários com IDs:", ids);
-    console.log("Usuários disponíveis:", users);
+    console.log("Usuários disponíveis:", users.map(u => ({id: u.id, name: u.name})));
     
     const foundUsers = users.filter(user => ids.includes(user.id));
-    console.log("Usuários encontrados:", foundUsers);
+    console.log("Usuários encontrados:", foundUsers.length);
     
     return foundUsers;
   };

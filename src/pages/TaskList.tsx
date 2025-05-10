@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useTasks } from "@/contexts/task";
 import { useUsers } from "@/contexts/UserContext";
 import { Link } from "react-router-dom";
@@ -21,20 +21,45 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Task } from "@/types";
-import { Edit, MoreHorizontal, Plus, Trash, Users } from "lucide-react";
+import { Edit, MoreHorizontal, Plus, Trash, Users, AlertCircle, RefreshCw } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/auth";
+import { toast } from "sonner";
 
 const TaskList = () => {
   const { tasks, deleteTask } = useTasks();
-  const { getUsersByIds } = useUsers();
+  const { getUsersByIds, users } = useUsers();
+  const { currentUser } = useAuth();
   const [searchTerm, setSearchTerm] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [connectionError, setConnectionError] = useState<string | null>(null);
   
   const filteredTasks = tasks.filter(task =>
     task.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
     task.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
     task.unit.toLowerCase().includes(searchTerm.toLowerCase())
   );
+  
+  // Verificar conexão com o Supabase
+  useEffect(() => {
+    const checkConnection = async () => {
+      try {
+        const { error } = await supabase.from('profiles').select('count').limit(1);
+        if (error) {
+          setConnectionError(`Erro de conexão com o banco de dados: ${error.message}`);
+        } else {
+          setConnectionError(null);
+        }
+      } catch (err: any) {
+        setConnectionError(`Falha na conexão: ${err.message || 'Erro desconhecido'}`);
+      }
+    };
+    
+    checkConnection();
+  }, []);
   
   const getStatusBadge = (status: string) => {
     switch (status) {
@@ -49,17 +74,63 @@ const TaskList = () => {
     }
   };
   
+  const handleRefresh = async () => {
+    setLoading(true);
+    try {
+      // Recarregar a página para atualizar os dados
+      window.location.reload();
+    } catch (error: any) {
+      toast.error('Erro ao atualizar: ' + (error.message || 'Erro desconhecido'));
+    } finally {
+      setLoading(false);
+    }
+  };
+  
+  if (!currentUser) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <p className="text-muted-foreground">Você precisa estar logado para visualizar esta página</p>
+      </div>
+    );
+  }
+  
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-bold">Gerenciamento de Tarefas</h1>
-        <Button asChild>
-          <Link to="/tasks/new">
-            <Plus className="mr-2 h-4 w-4" />
-            Adicionar Tarefa
-          </Link>
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="outline" onClick={handleRefresh} disabled={loading}>
+            <RefreshCw className={`mr-2 h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
+            Atualizar
+          </Button>
+          <Button asChild>
+            <Link to="/tasks/new">
+              <Plus className="mr-2 h-4 w-4" />
+              Adicionar Tarefa
+            </Link>
+          </Button>
+        </div>
       </div>
+      
+      {connectionError && (
+        <Alert variant="destructive">
+          <AlertCircle className="h-4 w-4" />
+          <AlertTitle>Problema de conexão</AlertTitle>
+          <AlertDescription>{connectionError}</AlertDescription>
+        </Alert>
+      )}
+      
+      {!connectionError && tasks.length === 0 && (
+        <Alert>
+          <AlertCircle className="h-4 w-4" />
+          <AlertTitle>Nenhuma tarefa encontrada</AlertTitle>
+          <AlertDescription>
+            {currentUser?.role === 'admin' 
+              ? 'Você não possui tarefas criadas. Clique em "Adicionar Tarefa" para criar uma nova.' 
+              : 'Você não possui tarefas atribuídas. Entre em contato com um administrador.'}
+          </AlertDescription>
+        </Alert>
+      )}
       
       <div className="flex items-center mb-4">
         <Input
@@ -91,7 +162,7 @@ const TaskList = () => {
                   <TableCell>
                     <TooltipProvider>
                       <div className="flex -space-x-2">
-                        {getUsersByIds(task.assignees).map((user) => (
+                        {task.assignees && getUsersByIds(task.assignees).map((user) => (
                           <Tooltip key={user.id}>
                             <TooltipTrigger asChild>
                               <Avatar className="h-7 w-7 border-2 border-background">
@@ -104,7 +175,7 @@ const TaskList = () => {
                             </TooltipContent>
                           </Tooltip>
                         ))}
-                        {task.assignees.length === 0 && (
+                        {(!task.assignees || task.assignees.length === 0) && (
                           <span className="text-xs text-muted-foreground italic flex items-center gap-1">
                             <Users className="h-4 w-4" />
                             Sem atribuições
@@ -152,6 +223,18 @@ const TaskList = () => {
           </TableBody>
         </Table>
       </div>
+      
+      {/* Informações de Depuração */}
+      {process.env.NODE_ENV !== 'production' && (
+        <div className="mt-4 p-4 border border-dashed border-gray-300 rounded-md">
+          <h3 className="text-sm font-semibold mb-2">Informações de Depuração:</h3>
+          <ul className="text-xs space-y-1 text-muted-foreground">
+            <li>Usuário: {currentUser?.name} ({currentUser?.role})</li>
+            <li>Total de tarefas: {tasks.length}</li>
+            <li>Total de usuários: {users.length}</li>
+          </ul>
+        </div>
+      )}
     </div>
   );
 };

@@ -1,10 +1,10 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useTasks } from "@/contexts/task";
 import { TaskStatus, Task } from "@/types";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/auth";
-import { Plus } from "lucide-react";
+import { Plus, AlertCircle } from "lucide-react";
 import { toast } from "sonner";
 import TaskCard from "@/components/kanban/TaskCard";
 import KanbanColumn from "@/components/kanban/KanbanColumn";
@@ -12,20 +12,41 @@ import TaskDetailDialog from "@/components/kanban/TaskDetailDialog";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useNavigate } from "react-router-dom";
+import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
+import { supabase } from "@/integrations/supabase/client";
 
 const KanbanBoard = () => {
   const navigate = useNavigate();
   const { currentUser } = useAuth();
-  const { getUserTasksByStatus, updateTaskStatus, updateTask, deleteTask, loading } = useTasks();
+  const { getUserTasksByStatus, updateTaskStatus, updateTask, deleteTask, loading, tasks } = useTasks();
   const [draggedTask, setDraggedTask] = useState<Task | null>(null);
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [observation, setObservation] = useState("");
+  const [connectionError, setConnectionError] = useState<string | null>(null);
   const isMobile = useIsMobile();
 
   const todoTasks = getUserTasksByStatus("todo");
   const progressTasks = getUserTasksByStatus("progress");
   const completedTasks = getUserTasksByStatus("completed");
   
+  // Verificar conexão com o Supabase
+  useEffect(() => {
+    const checkConnection = async () => {
+      try {
+        const { error } = await supabase.from('profiles').select('count').limit(1);
+        if (error) {
+          setConnectionError(`Erro de conexão com o banco de dados: ${error.message}`);
+        } else {
+          setConnectionError(null);
+        }
+      } catch (err: any) {
+        setConnectionError(`Falha na conexão: ${err.message || 'Erro desconhecido'}`);
+      }
+    };
+    
+    checkConnection();
+  }, []);
+
   const handleDragStart = (task: Task) => {
     setDraggedTask(task);
   };
@@ -125,6 +146,26 @@ const KanbanBoard = () => {
           )}
         </div>
         
+        {connectionError && (
+          <Alert variant="destructive" className="mb-4">
+            <AlertCircle className="h-4 w-4" />
+            <AlertTitle>Problema de conexão</AlertTitle>
+            <AlertDescription>{connectionError}</AlertDescription>
+          </Alert>
+        )}
+        
+        {tasks.length === 0 && !loading && !connectionError && (
+          <Alert className="mb-4">
+            <AlertCircle className="h-4 w-4" />
+            <AlertTitle>Nenhuma tarefa encontrada</AlertTitle>
+            <AlertDescription>
+              {currentUser?.role === 'admin' 
+                ? 'Você não possui tarefas criadas. Clique em "Criar Tarefa" para adicionar uma nova tarefa.' 
+                : 'Você não possui tarefas atribuídas. Entre em contato com um administrador.'}
+            </AlertDescription>
+          </Alert>
+        )}
+        
         <div className="kanban-board">
           <KanbanColumn
             title="A Fazer"
@@ -175,6 +216,18 @@ const KanbanBoard = () => {
           onSave={handleSaveObservation}
           onDelete={handleDeleteTask}
         />
+        
+        {/* Informações de Depuração */}
+        {process.env.NODE_ENV !== 'production' && (
+          <div className="mt-8 p-4 border border-dashed border-gray-300 rounded-md">
+            <h3 className="text-sm font-semibold mb-2">Informações de Depuração:</h3>
+            <ul className="text-xs space-y-1 text-muted-foreground">
+              <li>Usuário: {currentUser?.name} ({currentUser?.role})</li>
+              <li>Total de tarefas carregadas: {tasks.length}</li>
+              <li>A Fazer: {todoTasks.length} | Em Progresso: {progressTasks.length} | Concluído: {completedTasks.length}</li>
+            </ul>
+          </div>
+        )}
       </div>
     </div>
   );

@@ -6,7 +6,41 @@ import type { Database } from './types';
 const SUPABASE_URL = "https://snobnrnjzudifcowbshc.supabase.co";
 const SUPABASE_PUBLISHABLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNub2Jucm5qenVkaWZjb3dic2hjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDY3ODEyNjksImV4cCI6MjA2MjM1NzI2OX0.52YNF4frhpPugjeNBoObJ3xr-FmFIhR1DIBYd8WmCfk";
 
+// Configuração adicional para debug e melhorar suporte a sessão
+const supabaseOptions = {
+  auth: {
+    persistSession: true,
+    autoRefreshToken: true,
+    storage: localStorage
+  },
+  global: {
+    headers: {
+      'x-client-info': 'lovable-app'
+    }
+  },
+  debug: true
+};
+
 // Import the supabase client like this:
 // import { supabase } from "@/integrations/supabase/client";
 
-export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
+export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, supabaseOptions);
+
+console.log("Supabase client initialized with URL:", SUPABASE_URL);
+
+// Verifica a conexão com o Supabase
+async function checkSupabaseConnection() {
+  try {
+    const { data, error } = await supabase.from('profiles').select('count').limit(1);
+    if (error) {
+      console.error("⚠️ Erro ao conectar com o Supabase:", error);
+    } else {
+      console.log("✅ Conexão com Supabase estabelecida com sucesso");
+    }
+  } catch (err) {
+    console.error("❌ Falha crítica na conexão com Supabase:", err);
+  }
+}
+
+// Executa a verificação quando o cliente é importado
+checkSupabaseConnection();

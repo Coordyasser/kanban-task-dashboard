@@ -1,7 +1,7 @@
 
 import { useState } from "react";
 import { useAuth } from "@/contexts/auth";
-import { useTasks } from "@/contexts/TaskContext";
+import { useTasks } from "@/contexts/task";
 import { useUsers } from "@/contexts/UserContext";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";

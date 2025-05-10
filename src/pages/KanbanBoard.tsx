@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import { useTasks } from "@/contexts/TaskContext";
+import { useTasks } from "@/contexts/task";
 import { TaskStatus, Task } from "@/types";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/auth";

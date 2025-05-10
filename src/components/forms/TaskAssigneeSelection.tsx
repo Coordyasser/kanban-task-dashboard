@@ -54,11 +54,12 @@ const TaskAssigneeSelection = ({
   }, []);
 
   const toggleAssignee = (userId: string) => {
-    setSelectedAssignees(prev => 
-      prev.includes(userId)
-        ? prev.filter(id => id !== userId)
-        : [...prev, userId]
-    );
+    // Fix: Create a new array first, then pass it to setSelectedAssignees
+    const newAssignees = selectedAssignees.includes(userId)
+      ? selectedAssignees.filter(id => id !== userId)
+      : [...selectedAssignees, userId];
+    
+    setSelectedAssignees(newAssignees);
   };
 
   return (

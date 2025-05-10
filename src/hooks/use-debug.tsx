@@ -12,7 +12,7 @@ export function useDebugInfo() {
   useEffect(() => {
     const checkConnection = async () => {
       try {
-        // Verifica a conexão com o banco de dados
+        // Check database connection
         const start = Date.now();
         const { data, error } = await supabase
           .from('profiles')
@@ -29,13 +29,13 @@ export function useDebugInfo() {
           return;
         }
         
-        // Busca informações adicionais do banco de dados usando a função SQL get_simple_table_info
-        // Esta função está definida no arquivo debug_functions.sql
+        // Fetch additional database information using the SQL function get_simple_table_info
         let tablesInfo = null;
         
         try {
-          // Use a type cast to avoid TypeScript errors with RPC functions not in the type definitions
-          const { data: tableData, error: tableError } = await (supabase.rpc as any)('get_simple_table_info');
+          // Type assertion to bypass TypeScript type checking for custom RPC functions
+          const rpc = supabase.rpc as any;
+          const { data: tableData, error: tableError } = await rpc('get_simple_table_info');
             
           if (!tableError && tableData) {
             tablesInfo = tableData;
@@ -66,8 +66,8 @@ export function useDebugInfo() {
     
     checkConnection();
     
-    // Verifica a conexão periodicamente
-    const interval = setInterval(checkConnection, 60000); // a cada minuto
+    // Periodic connection check
+    const interval = setInterval(checkConnection, 60000); // every minute
     
     return () => clearInterval(interval);
   }, []);

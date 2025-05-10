@@ -6,7 +6,7 @@ import type { Database } from './types';
 const SUPABASE_URL = "https://snobnrnjzudifcowbshc.supabase.co";
 const SUPABASE_PUBLISHABLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNub2Jucm5qenVkaWZjb3dic2hjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDY3ODEyNjksImV4cCI6MjA2MjM1NzI2OX0.52YNF4frhpPugjeNBoObJ3xr-FmFIhR1DIBYd8WmCfk";
 
-// Configuração adicional para debug e melhorar suporte a sessão
+// Additional configuration for debugging and improved session support
 const supabaseOptions = {
   auth: {
     persistSession: true,
@@ -18,7 +18,15 @@ const supabaseOptions = {
       'x-client-info': 'lovable-app'
     }
   },
-  debug: true
+  // Enable debug mode in development environment
+  debug: process.env.NODE_ENV !== 'production',
+  // Improved performance settings
+  realtime: {
+    timeout: 30000, // increase timeout from default 10s
+    params: {
+      eventsPerSecond: 10
+    }
+  }
 };
 
 // Import the supabase client like this:
@@ -28,7 +36,7 @@ export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABL
 
 console.log("Supabase client initialized with URL:", SUPABASE_URL);
 
-// Verifica a conexão com o Supabase
+// Verify connection with Supabase
 async function checkSupabaseConnection() {
   try {
     const { data, error } = await supabase.from('profiles').select('count').limit(1);
@@ -42,5 +50,22 @@ async function checkSupabaseConnection() {
   }
 }
 
-// Executa a verificação quando o cliente é importado
+// Execute the check when the client is imported
 checkSupabaseConnection();
+
+// Add support for manual connection checking
+export const testConnection = async () => {
+  try {
+    const start = Date.now();
+    const { error } = await supabase.from('profiles').select('count').limit(1);
+    const end = Date.now();
+    
+    if (error) {
+      return { status: 'error', message: error.message, time: null };
+    }
+    
+    return { status: 'connected', message: 'Conexão estabelecida', time: end - start };
+  } catch (err: any) {
+    return { status: 'error', message: err.message || 'Erro desconhecido', time: null };
+  }
+};

@@ -1,7 +1,6 @@
 
 import { Task } from "@/types";
 import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useUsers } from "@/contexts/UserContext";
 import { Trash, Users } from "lucide-react";
 import { useAuth } from "@/contexts/auth";
@@ -80,25 +79,26 @@ const TaskCard = ({ task, onDragStart, onClick, onDelete }: TaskCardProps) => {
           </div>
           
           <div className="mt-1 flex flex-wrap gap-1">
-            <TooltipProvider>
-              {assignedUsers && assignedUsers.length > 0 ? (
-                assignedUsers.map((user) => (
-                  <Tooltip key={user.id}>
-                    <TooltipTrigger asChild>
-                      <Avatar className="h-6 w-6 border-2 border-background">
-                        <AvatarImage src={user.avatar} alt={user.name} />
-                        <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
-                      </Avatar>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p>{user.name}</p>
-                    </TooltipContent>
-                  </Tooltip>
-                ))
-              ) : (
-                <span className="text-xs text-muted-foreground italic">Sem atribuições</span>
-              )}
-            </TooltipProvider>
+            {assignedUsers && assignedUsers.length > 0 ? (
+              <div className="flex flex-wrap gap-1">
+                {assignedUsers.map((user) => (
+                  <TooltipProvider key={user.id}>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Badge variant="secondary" className="text-xs">
+                          {user.name.split(' ')[0]}
+                        </Badge>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>{user.name}</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                ))}
+              </div>
+            ) : (
+              <span className="text-xs text-muted-foreground italic">Sem atribuições</span>
+            )}
           </div>
         </div>
       </div>

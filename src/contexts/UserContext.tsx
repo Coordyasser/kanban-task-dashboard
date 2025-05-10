@@ -2,6 +2,8 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { User } from '../types';
 import { mockUsers } from '../services/mockData';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 
 interface UserContextType {
   users: User[];
@@ -18,9 +20,42 @@ export function UserProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // In a real app, we would fetch users from an API
-    setUsers(mockUsers);
-    setLoading(false);
+    const fetchUsers = async () => {
+      setLoading(true);
+      try {
+        // Tenta buscar usuários do Supabase
+        const { data: profiles, error } = await supabase
+          .from('profiles')
+          .select('*');
+        
+        if (error) {
+          console.error("Erro ao buscar perfis de usuário:", error);
+          // Fallback para dados simulados
+          setUsers(mockUsers);
+        } else if (profiles) {
+          console.log("Perfis de usuários carregados:", profiles);
+          // Converte perfis para o formato User
+          const formattedUsers: User[] = profiles.map(profile => ({
+            id: profile.id,
+            name: profile.name,
+            email: profile.email,
+            role: profile.role,
+            avatar: profile.avatar
+          }));
+          
+          setUsers(formattedUsers);
+        }
+      } catch (error) {
+        console.error("Erro ao buscar usuários:", error);
+        toast.error('Erro ao carregar usuários');
+        // Usa dados simulados como fallback
+        setUsers(mockUsers);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUsers();
   }, []);
 
   const getUser = (id: string): User | undefined => {
@@ -28,7 +63,15 @@ export function UserProvider({ children }: { children: ReactNode }) {
   };
 
   const getUsersByIds = (ids: string[]): User[] => {
-    return users.filter(user => ids.includes(user.id));
+    if (!ids || ids.length === 0) return [];
+    
+    console.log("Buscando usuários com IDs:", ids);
+    console.log("Usuários disponíveis:", users);
+    
+    const foundUsers = users.filter(user => ids.includes(user.id));
+    console.log("Usuários encontrados:", foundUsers);
+    
+    return foundUsers;
   };
 
   const getAllUsers = (): User[] => {

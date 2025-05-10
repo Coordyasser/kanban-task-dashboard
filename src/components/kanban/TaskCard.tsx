@@ -31,6 +31,10 @@ const TaskCard = ({ task, onDragStart, onClick, onDelete }: TaskCardProps) => {
     }
   };
   
+  // Log para debug - verificar se task.assignees contém dados
+  console.log(`Tarefa ${task.id} - Assignees:`, task.assignees);
+  console.log(`Usuários atribuídos encontrados:`, assignedUsers);
+  
   return (
     <Card
       className={`task-card ${task.status} hover:shadow-md transition-shadow duration-200 cursor-pointer`}
@@ -38,7 +42,7 @@ const TaskCard = ({ task, onDragStart, onClick, onDelete }: TaskCardProps) => {
       onDragStart={() => onDragStart(task)}
       onClick={() => onClick(task)}
     >
-      <div className="task-header p-3 pb-2">
+      <div className="task-header p-3 pb-2 flex justify-between items-start">
         <div>
           <h4 className="task-title font-medium">{task.title}</h4>
           <Badge variant="outline" className="bg-white mt-1">
@@ -77,7 +81,7 @@ const TaskCard = ({ task, onDragStart, onClick, onDelete }: TaskCardProps) => {
           
           <div className="mt-1 flex flex-wrap gap-1">
             <TooltipProvider>
-              {assignedUsers.length > 0 ? (
+              {assignedUsers && assignedUsers.length > 0 ? (
                 assignedUsers.map((user) => (
                   <Tooltip key={user.id}>
                     <TooltipTrigger asChild>

@@ -1,3 +1,4 @@
+
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { Task, TaskStatus, User } from '../types';
 import { mockTasks } from '../services/mockData';
@@ -82,6 +83,7 @@ export function TaskProvider({ children }: { children: ReactNode }) {
             createdAt: task.created_at.split('T')[0]
           }));
           
+          console.log("Tarefas formatadas:", formattedTasks);
           setTasks(formattedTasks);
         }
       } catch (error) {

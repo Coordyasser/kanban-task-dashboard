@@ -1,3 +1,4 @@
+
 import { createContext, useContext, useState, useEffect } from 'react';
 import { Task, TaskStatus } from '@/types';
 import { useAuth } from '../auth';
@@ -15,10 +16,23 @@ export function TaskProvider({ children }: TaskProviderProps) {
 
   useEffect(() => {
     const loadTasks = async () => {
+      if (!currentUser) {
+        setTasks([]);
+        setLoading(false);
+        return;
+      }
+
       setLoading(true);
-      const fetchedTasks = await fetchTasks(currentUser);
-      setTasks(fetchedTasks);
-      setLoading(false);
+      try {
+        const fetchedTasks = await fetchTasks(currentUser);
+        setTasks(fetchedTasks);
+      } catch (error) {
+        console.error("Erro ao carregar tarefas:", error);
+        toast.error('Falha ao carregar tarefas');
+        setTasks([]);
+      } finally {
+        setLoading(false);
+      }
     };
 
     loadTasks();

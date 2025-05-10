@@ -37,7 +37,7 @@ export const fetchTasks = async (currentUser: User | null) => {
         .from('task_assignments')
         .select(`
           task_id,
-          tasks!task_assignments_task_id_fkey (
+          tasks!inner (
             id,
             title,
             description,
@@ -81,19 +81,21 @@ export const fetchTasks = async (currentUser: User | null) => {
         }));
       } else {
         // Para usuários regulares, as tarefas estão aninhadas
-        formattedTasks = data.map(assignment => ({
-          id: assignment.tasks.id,
-          title: assignment.tasks.title,
-          description: assignment.tasks.description,
-          unit: assignment.tasks.unit,
-          assignees: assignment.tasks.task_assignments.map((a: any) => a.user_id),
-          startDate: assignment.tasks.start_date,
-          endDate: assignment.tasks.end_date,
-          status: assignment.tasks.status,
-          createdBy: assignment.tasks.created_by,
-          observations: assignment.tasks.observations || "",
-          createdAt: assignment.tasks.created_at.split('T')[0]
-        }));
+        formattedTasks = data
+          .filter(item => item.tasks !== null)  // Filtrar tarefas nulas
+          .map(assignment => ({
+            id: assignment.tasks.id,
+            title: assignment.tasks.title,
+            description: assignment.tasks.description,
+            unit: assignment.tasks.unit,
+            assignees: assignment.tasks.task_assignments.map((a: any) => a.user_id),
+            startDate: assignment.tasks.start_date,
+            endDate: assignment.tasks.end_date,
+            status: assignment.tasks.status,
+            createdBy: assignment.tasks.created_by,
+            observations: assignment.tasks.observations || "",
+            createdAt: assignment.tasks.created_at.split('T')[0]
+          }));
       }
       
       console.log("Tarefas formatadas:", formattedTasks);

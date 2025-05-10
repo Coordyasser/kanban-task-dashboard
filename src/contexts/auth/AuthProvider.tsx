@@ -28,6 +28,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
           console.log("Session found:", session.user.id);
           
           try {
+            // Try to fetch the user profile, with retries if needed
             const user = await fetchUserProfile(session.user.id);
             if (user) {
               console.log("Profile loaded successfully:", user);
@@ -63,6 +64,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
         setLoading(true);
         
         try {
+          // Add a small delay to ensure profile is created
+          await new Promise(resolve => setTimeout(resolve, 500));
+          
           console.log("Attempting to fetch user profile after sign in");
           const user = await fetchUserProfile(session.user.id);
           

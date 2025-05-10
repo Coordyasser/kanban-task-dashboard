@@ -52,7 +52,8 @@ const AuthGuard = ({ children }: { children: React.ReactNode }) => {
         // If logged in and on auth pages, redirect to dashboard
         if (location.pathname === "/login" || 
             location.pathname === "/register" || 
-            location.pathname === "/") {
+            location.pathname === "/" ||
+            location.pathname === "") {
           console.log("User already authenticated, redirecting to dashboard");
           navigate("/dashboard", { replace: true });
         }

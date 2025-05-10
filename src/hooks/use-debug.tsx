@@ -34,8 +34,8 @@ export function useDebugInfo() {
         let tablesInfo = null;
         
         try {
-          const { data: tableData, error: tableError } = await supabase
-            .rpc('get_simple_table_info');
+          // Use a type cast to avoid TypeScript errors with RPC functions not in the type definitions
+          const { data: tableData, error: tableError } = await (supabase.rpc as any)('get_simple_table_info');
             
           if (!tableError && tableData) {
             tablesInfo = tableData;

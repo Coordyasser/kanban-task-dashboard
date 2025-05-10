@@ -2,6 +2,26 @@
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { User } from '@/types';
+import { Json } from '@/integrations/supabase/types';
+
+// Helper function to check if a JSON value is a profile object
+function isProfileObject(value: Json): value is {
+  id: string;
+  name: string;
+  email: string;
+  role: string;
+  avatar?: string;
+} {
+  if (typeof value !== 'object' || value === null) return false;
+  
+  const obj = value as Record<string, unknown>;
+  return (
+    typeof obj.id === 'string' &&
+    typeof obj.name === 'string' &&
+    typeof obj.email === 'string' &&
+    typeof obj.role === 'string'
+  );
+}
 
 export async function fetchUserProfile(userId: string): Promise<User | null> {
   try {
@@ -45,7 +65,7 @@ export async function fetchUserProfile(userId: string): Promise<User | null> {
       return null;
     }
     
-    if (data) {
+    if (data && isProfileObject(data)) {
       console.log('Profile found via RPC function:', data);
       const user: User = {
         id: data.id,
@@ -58,7 +78,7 @@ export async function fetchUserProfile(userId: string): Promise<User | null> {
       return user;
     }
     
-    console.warn(`No profile found for user ${userId}`);
+    console.warn(`No valid profile data found for user ${userId}`);
     return null;
   } catch (error) {
     console.error('Error in fetchUserProfile:', error);

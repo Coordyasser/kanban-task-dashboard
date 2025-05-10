@@ -5,7 +5,6 @@ import { toast } from 'sonner';
 import { supabase } from '../../integrations/supabase/client';
 import { AuthContext } from './AuthContext';
 import { fetchUserProfile, performLogin, performLogout, performRegister } from './authUtils';
-import { useNavigate } from 'react-router-dom';
 
 interface AuthProviderProps {
   children: ReactNode;
@@ -28,8 +27,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
         if (session) {
           console.log("Session found:", session.user.id);
           
-          // Add delay to ensure profile creation trigger completes
-          setTimeout(async () => {
+          try {
             const user = await fetchUserProfile(session.user.id);
             if (user) {
               console.log("Profile loaded successfully:", user);
@@ -40,16 +38,17 @@ export function AuthProvider({ children }: AuthProviderProps) {
               // Force logout if profile can't be loaded
               await supabase.auth.signOut();
             }
-            setLoading(false);
-          }, 1000); // Give the trigger time to complete
-        } else {
-          setLoading(false);
+          } catch (error) {
+            console.error("Error fetching profile:", error);
+            toast.error("Erro ao carregar perfil");
+            await supabase.auth.signOut();
+          }
         }
       } catch (error) {
         console.error('Error checking session:', error);
         toast.error('Erro ao verificar sessão de autenticação');
-        setLoading(false);
       } finally {
+        setLoading(false);
         setAuthInitialized(true);
       }
     };
@@ -62,27 +61,26 @@ export function AuthProvider({ children }: AuthProviderProps) {
       
       if (event === 'SIGNED_IN' && session) {
         setLoading(true);
-        // Fetch profile data using a timeout to avoid deadlocks and give profile creation time
-        setTimeout(async () => {
-          try {
-            console.log("Attempting to fetch user profile after sign in");
-            const user = await fetchUserProfile(session.user.id);
-            if (user) {
-              console.log("Profile updated after sign in:", user);
-              setCurrentUser(user);
-            } else {
-              console.warn("No profile found for authenticated user after sign in");
-              toast.error("Erro ao carregar perfil do usuário");
-              // Force logout if profile can't be loaded
-              await supabase.auth.signOut();
-            }
-          } catch (error) {
-            console.error('Error processing auth state change:', error);
-            toast.error("Erro ao processar alteração de autenticação");
-          } finally {
-            setLoading(false);
+        
+        try {
+          console.log("Attempting to fetch user profile after sign in");
+          const user = await fetchUserProfile(session.user.id);
+          
+          if (user) {
+            console.log("Profile updated after sign in:", user);
+            setCurrentUser(user);
+          } else {
+            console.warn("No profile found for authenticated user after sign in");
+            toast.error("Erro ao carregar perfil do usuário");
+            // Force logout if profile can't be loaded
+            await supabase.auth.signOut();
           }
-        }, 1000); // Wait for profile creation
+        } catch (error) {
+          console.error('Error processing auth state change:', error);
+          toast.error("Erro ao processar alteração de autenticação");
+        } finally {
+          setLoading(false);
+        }
       } else if (event === 'SIGNED_OUT') {
         console.log("User signed out");
         setCurrentUser(null);

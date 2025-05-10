@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { User } from '@/types';
@@ -27,58 +26,62 @@ export async function fetchUserProfile(userId: string): Promise<User | null> {
   try {
     console.log(`Fetching profile for user: ${userId}`);
     
-    // Call the fetchUserProfile database function
-    const { data, error } = await supabase.rpc('fetchuserprofile', {
-      userid: userId
-    });
+    // Direct profiles query as the primary method - more reliable
+    const { data: profileData, error: profileError } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('id', userId)
+      .maybeSingle();
     
-    if (error) {
-      console.error('Error calling fetchUserProfile function:', error);
+    if (profileError) {
+      console.error('Error in direct profile query:', profileError);
       
-      // Fallback to direct query if the function fails
-      console.log('Trying direct query as fallback...');
-      const { data: profileData, error: profileError } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', userId)
-        .maybeSingle();
-      
-      if (profileError) {
-        console.error('Error in fallback profile query:', profileError);
-        toast.error('Erro ao buscar perfil do usuário');
-        return null;
-      }
-      
-      if (profileData) {
-        console.log('Profile found via direct query:', profileData);
-        const user: User = {
-          id: profileData.id,
-          name: profileData.name,
-          email: profileData.email,
-          role: profileData.role as 'admin' | 'user',
-          avatar: profileData.avatar || undefined
-        };
+      // Try RPC function as fallback
+      try {
+        console.log('Trying RPC fallback...');
+        const { data: rpcData, error: rpcError } = await (supabase.rpc as any)('fetchuserprofile', {
+          userid: userId
+        });
         
-        return user;
+        if (rpcError) {
+          console.error('Error in RPC fallback:', rpcError);
+          toast.error('Erro ao buscar perfil do usuário');
+          return null;
+        }
+        
+        if (rpcData && isProfileObject(rpcData)) {
+          console.log('Profile found via RPC function:', rpcData);
+          const user: User = {
+            id: rpcData.id,
+            name: rpcData.name,
+            email: rpcData.email,
+            role: rpcData.role as 'admin' | 'user',
+            avatar: rpcData.avatar || undefined
+          };
+          
+          return user;
+        }
+      } catch (rpcErr) {
+        console.error('Exception in RPC fallback:', rpcErr);
       }
       
       return null;
     }
     
-    if (data && isProfileObject(data)) {
-      console.log('Profile found via RPC function:', data);
+    if (profileData) {
+      console.log('Profile found via direct query:', profileData);
       const user: User = {
-        id: data.id,
-        name: data.name,
-        email: data.email,
-        role: data.role as 'admin' | 'user',
-        avatar: data.avatar || undefined
+        id: profileData.id,
+        name: profileData.name,
+        email: profileData.email,
+        role: profileData.role as 'admin' | 'user',
+        avatar: profileData.avatar || undefined
       };
       
       return user;
     }
     
-    console.warn(`No valid profile data found for user ${userId}`);
+    console.warn(`No profile found for user ${userId}`);
     return null;
   } catch (error) {
     console.error('Error in fetchUserProfile:', error);

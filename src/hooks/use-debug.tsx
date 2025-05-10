@@ -21,6 +21,7 @@ export function useDebugInfo() {
         const end = Date.now();
         
         if (error) {
+          console.error('Database connection error:', error);
           setDebugInfo({
             connectionStatus: 'error',
             databaseInfo: null,
@@ -29,13 +30,12 @@ export function useDebugInfo() {
           return;
         }
         
-        // Fetch additional database information using the SQL function get_simple_table_info
+        // Fetch additional database information using the SQL function
         let tablesInfo = null;
         
         try {
           // Type assertion to bypass TypeScript type checking for custom RPC functions
-          const rpc = supabase.rpc as any;
-          const { data: tableData, error: tableError } = await rpc('get_simple_table_info');
+          const { data: tableData, error: tableError } = await (supabase.rpc as any)('get_simple_table_info');
             
           if (!tableError && tableData) {
             tablesInfo = tableData;
@@ -56,6 +56,7 @@ export function useDebugInfo() {
           error: null
         });
       } catch (err: any) {
+        console.error('Error in useDebugInfo:', err);
         setDebugInfo({
           connectionStatus: 'error',
           databaseInfo: null,
@@ -64,10 +65,11 @@ export function useDebugInfo() {
       }
     };
     
+    // Initial check
     checkConnection();
     
-    // Periodic connection check
-    const interval = setInterval(checkConnection, 60000); // every minute
+    // Periodic connection check with a reduced frequency to improve performance
+    const interval = setInterval(checkConnection, 120000); // every 2 minutes instead of every minute
     
     return () => clearInterval(interval);
   }, []);

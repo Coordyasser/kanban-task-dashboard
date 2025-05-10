@@ -33,6 +33,7 @@ export const fetchTasks = async (currentUser: User | null) => {
         .eq('created_by', currentUser.id));
     } else {
       // Usuários regulares veem tarefas às quais foram atribuídos
+      // Usando left join para garantir que todas as tarefas relacionadas sejam retornadas
       ({ data, error } = await supabase
         .from('task_assignments')
         .select(`
@@ -81,6 +82,7 @@ export const fetchTasks = async (currentUser: User | null) => {
         }));
       } else {
         // Para usuários regulares, as tarefas estão aninhadas
+        // Filtrar registros onde task.tasks é nulo para evitar erros
         formattedTasks = data
           .filter(item => item.tasks !== null)  // Filtrar tarefas nulas
           .map(assignment => ({

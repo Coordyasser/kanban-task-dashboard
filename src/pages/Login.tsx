@@ -29,13 +29,11 @@ const Login = () => {
       const success = await login(email, password);
       console.log("Resultado do login:", success);
       
-      if (success) {
-        toast.success("Login realizado com sucesso");
-        // Redirect is now handled in the AuthGuard component
-      } else {
+      if (!success) {
         // Login failed, show error
         setIsSubmitting(false);
       }
+      // Se for bem-sucedido, o redirecionamento é tratado pelo AuthGuard
     } catch (error: any) {
       console.error("Erro de login:", error);
       toast.error(`Falha no login: ${error.message || "Erro desconhecido"}`);

@@ -7,8 +7,16 @@ export async function fetchUserProfile(userId: string): Promise<User | null> {
   try {
     console.log(`Fetching profile for user: ${userId}`);
     
-    // Try up to 3 times with increasing delay to allow for profile creation
-    for (let attempt = 1; attempt <= 3; attempt++) {
+    // Call the fetchUserProfile database function
+    const { data, error } = await supabase.rpc('fetchuserprofile', {
+      userid: userId
+    });
+    
+    if (error) {
+      console.error('Error calling fetchUserProfile function:', error);
+      
+      // Fallback to direct query if the function fails
+      console.log('Trying direct query as fallback...');
       const { data: profileData, error: profileError } = await supabase
         .from('profiles')
         .select('*')
@@ -16,19 +24,13 @@ export async function fetchUserProfile(userId: string): Promise<User | null> {
         .maybeSingle();
       
       if (profileError) {
-        console.error(`Error fetching profile (attempt ${attempt}):`, profileError);
-        
-        if (attempt < 3) {
-          // Wait before retrying
-          await new Promise(resolve => setTimeout(resolve, attempt * 500));
-          continue;
-        }
-        
-        throw profileError;
+        console.error('Error in fallback profile query:', profileError);
+        toast.error('Erro ao buscar perfil do usuário');
+        return null;
       }
       
       if (profileData) {
-        console.log(`Profile found on attempt ${attempt}:`, profileData);
+        console.log('Profile found via direct query:', profileData);
         const user: User = {
           id: profileData.id,
           name: profileData.name,
@@ -38,14 +40,25 @@ export async function fetchUserProfile(userId: string): Promise<User | null> {
         };
         
         return user;
-      } else if (attempt < 3) {
-        console.log(`Profile not found on attempt ${attempt}, retrying...`);
-        // Wait longer before retrying
-        await new Promise(resolve => setTimeout(resolve, attempt * 1000));
       }
+      
+      return null;
     }
     
-    console.warn(`No profile found for user ${userId} after multiple attempts`);
+    if (data) {
+      console.log('Profile found via RPC function:', data);
+      const user: User = {
+        id: data.id,
+        name: data.name,
+        email: data.email,
+        role: data.role as 'admin' | 'user',
+        avatar: data.avatar || undefined
+      };
+      
+      return user;
+    }
+    
+    console.warn(`No profile found for user ${userId}`);
     return null;
   } catch (error) {
     console.error('Error in fetchUserProfile:', error);

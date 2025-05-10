@@ -39,29 +39,28 @@ const AuthGuard = ({ children }: { children: React.ReactNode }) => {
 
   useEffect(() => {
     if (authInitialized && !loading) {
-      // Only redirect after authentication has fully initialized and is not loading
+      console.log("Auth status:", currentUser ? "Autenticado" : "Não autenticado", 
+                "Caminho atual:", location.pathname);
+      
       if (!currentUser) {
-        // If not logged in, redirect to login
-        if (location.pathname !== "/login" && 
-            location.pathname !== "/register" && 
-            location.pathname !== "/") {
-          console.log("User not authenticated, redirecting to login");
+        // Se não estiver logado, redirecione para login, exceto se já estiver em páginas públicas
+        const publicPaths = ["/login", "/register", "/"];
+        if (!publicPaths.includes(location.pathname)) {
+          console.log("Usuário não autenticado, redirecionando para login");
           navigate("/login", { replace: true });
         }
       } else {
-        // If logged in and on auth pages, redirect to dashboard
-        if (location.pathname === "/login" || 
-            location.pathname === "/register" || 
-            location.pathname === "/" ||
-            location.pathname === "") {
-          console.log("User already authenticated, redirecting to dashboard");
+        // Se estiver logado e em páginas de autenticação, redirecione para o dashboard
+        const authPaths = ["", "/", "/login", "/register"];
+        if (authPaths.includes(location.pathname)) {
+          console.log("Usuário já autenticado, redirecionando para dashboard");
           navigate("/dashboard", { replace: true });
         }
       }
     }
   }, [currentUser, loading, authInitialized, navigate, location.pathname]);
 
-  // Show loading state while authentication is initializing
+  // Mostra estado de carregamento enquanto a autenticação está inicializando
   if (!authInitialized || loading) {
     return (
       <div className="flex h-screen w-full items-center justify-center">

@@ -160,7 +160,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      fetchuserprofile: {
+        Args: { userid: string }
+        Returns: Json
+      }
     }
     Enums: {
       task_status: "todo" | "progress" | "completed"

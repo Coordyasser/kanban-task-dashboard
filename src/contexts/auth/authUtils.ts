@@ -5,32 +5,51 @@ import { User } from '@/types';
 
 export async function fetchUserProfile(userId: string): Promise<User | null> {
   try {
-    const { data: profileData, error: profileError } = await supabase
-      .from('profiles')
-      .select('*')
-      .eq('id', userId)
-      .maybeSingle();
+    console.log(`Fetching profile for user: ${userId}`);
     
-    if (profileError) {
-      console.error('Error fetching profile:', profileError);
-      throw profileError;
-    }
-    
-    if (profileData) {
-      const user: User = {
-        id: profileData.id,
-        name: profileData.name,
-        email: profileData.email,
-        role: profileData.role as 'admin' | 'user',
-        avatar: profileData.avatar || undefined
-      };
+    // Try up to 3 times with increasing delay to allow for profile creation
+    for (let attempt = 1; attempt <= 3; attempt++) {
+      const { data: profileData, error: profileError } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', userId)
+        .maybeSingle();
       
-      return user;
+      if (profileError) {
+        console.error(`Error fetching profile (attempt ${attempt}):`, profileError);
+        
+        if (attempt < 3) {
+          // Wait before retrying
+          await new Promise(resolve => setTimeout(resolve, attempt * 500));
+          continue;
+        }
+        
+        throw profileError;
+      }
+      
+      if (profileData) {
+        console.log(`Profile found on attempt ${attempt}:`, profileData);
+        const user: User = {
+          id: profileData.id,
+          name: profileData.name,
+          email: profileData.email,
+          role: profileData.role as 'admin' | 'user',
+          avatar: profileData.avatar || undefined
+        };
+        
+        return user;
+      } else if (attempt < 3) {
+        console.log(`Profile not found on attempt ${attempt}, retrying...`);
+        // Wait longer before retrying
+        await new Promise(resolve => setTimeout(resolve, attempt * 1000));
+      }
     }
     
+    console.warn(`No profile found for user ${userId} after multiple attempts`);
     return null;
   } catch (error) {
     console.error('Error in fetchUserProfile:', error);
+    toast.error('Erro ao buscar perfil do usuário');
     return null;
   }
 }
@@ -49,22 +68,23 @@ export async function performLogin(email: string, password: string): Promise<boo
     
     if (error) {
       console.error("Login error:", error);
-      toast.error(error.message || 'Failed to login');
+      toast.error(error.message || 'Falha ao fazer login');
       return false;
     }
     
     if (data.user) {
       // Successfully authenticated
       console.log("Login successful, user ID:", data.user.id);
+      toast.success('Login realizado com sucesso');
       return true;
     } else {
       console.error("No user returned from login attempt");
-      toast.error('Login failed');
+      toast.error('Login falhou');
       return false;
     }
   } catch (error: any) {
     console.error("Exception during login:", error);
-    toast.error('Login error: ' + (error.message || 'Unknown error'));
+    toast.error('Erro de login: ' + (error.message || 'Erro desconhecido'));
     return false;
   }
 }
@@ -72,10 +92,10 @@ export async function performLogin(email: string, password: string): Promise<boo
 export async function performLogout(): Promise<void> {
   try {
     await supabase.auth.signOut();
-    toast.info('You have been signed out');
+    toast.info('Você foi desconectado');
   } catch (error: any) {
     console.error("Logout error:", error);
-    toast.error('Error signing out: ' + (error.message || 'Unknown error'));
+    toast.error('Erro ao desconectar: ' + (error.message || 'Erro desconhecido'));
   }
 }
 
@@ -101,20 +121,20 @@ export async function performRegister(
     
     if (error) {
       console.error("Registration error:", error);
-      toast.error(error.message || 'Failed to create account');
+      toast.error(error.message || 'Falha ao criar conta');
       return false;
     }
     
     if (data.user) {
-      toast.success('Account created successfully');
+      toast.success('Conta criada com sucesso');
       return true;
     } else {
-      toast.error('Failed to create account');
+      toast.error('Falha ao criar conta');
       return false;
     }
   } catch (error: any) {
     console.error("Exception during registration:", error);
-    toast.error('Registration error: ' + (error.message || 'Unknown error'));
+    toast.error('Erro de registro: ' + (error.message || 'Erro desconhecido'));
     return false;
   }
 }

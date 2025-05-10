@@ -1,7 +1,7 @@
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useAuth } from "@/contexts/auth";
-import { useNavigate, Link } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -17,23 +17,15 @@ const Register = () => {
   const [role, setRole] = useState<"admin" | "user">("user");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
-  const { register, currentUser } = useAuth();
-  const navigate = useNavigate();
-
-  // Redirect if already logged in
-  useEffect(() => {
-    if (currentUser) {
-      navigate("/dashboard", { replace: true });
-    }
-  }, [currentUser, navigate]);
+  const { register, loading } = useAuth();
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
     
     if (password !== confirmPassword) {
-      setError("Passwords do not match");
-      toast.error("Passwords do not match");
+      setError("As senhas não conferem");
+      toast.error("As senhas não conferem");
       return;
     }
     
@@ -41,13 +33,16 @@ const Register = () => {
     
     try {
       const success = await register(name, email, password, role);
+      
       if (success) {
-        navigate("/dashboard", { replace: true });
+        toast.success("Conta criada com sucesso");
+        // Redirect is now handled in the AuthGuard component
+      } else {
+        setIsSubmitting(false);
       }
     } catch (error: any) {
-      console.error("Registration error:", error);
-      toast.error(`Registration failed: ${error.message || "Unknown error"}`);
-    } finally {
+      console.error("Erro no registro:", error);
+      toast.error(`Falha no registro: ${error.message || "Erro desconhecido"}`);
       setIsSubmitting(false);
     }
   };
@@ -56,13 +51,13 @@ const Register = () => {
     <div className="min-h-screen flex items-center justify-center bg-gray-50">
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-1">
-          <CardTitle className="text-2xl font-bold">Create an account</CardTitle>
-          <CardDescription>Enter your information to register</CardDescription>
+          <CardTitle className="text-2xl font-bold">Criar uma conta</CardTitle>
+          <CardDescription>Informe seus dados para se registrar</CardDescription>
         </CardHeader>
         <form onSubmit={handleRegister}>
           <CardContent className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="name">Full Name</Label>
+              <Label htmlFor="name">Nome Completo</Label>
               <Input
                 id="name"
                 placeholder="John Doe"
@@ -70,6 +65,7 @@ const Register = () => {
                 onChange={(e) => setName(e.target.value)}
                 required
                 autoFocus
+                disabled={isSubmitting || loading}
               />
             </div>
             <div className="space-y-2">
@@ -81,51 +77,54 @@ const Register = () => {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
+                disabled={isSubmitting || loading}
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
+              <Label htmlFor="password">Senha</Label>
               <Input
                 id="password"
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
+                disabled={isSubmitting || loading}
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="confirmPassword">Confirm Password</Label>
+              <Label htmlFor="confirmPassword">Confirmar Senha</Label>
               <Input
                 id="confirmPassword"
                 type="password"
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 required
+                disabled={isSubmitting || loading}
               />
             </div>
             <div className="space-y-2">
-              <Label>Account Type</Label>
+              <Label>Tipo de Conta</Label>
               <RadioGroup value={role} onValueChange={(value) => setRole(value as "admin" | "user")}>
                 <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="admin" id="admin" />
-                  <Label htmlFor="admin" className="cursor-pointer">Administrator</Label>
+                  <RadioGroupItem value="admin" id="admin" disabled={isSubmitting || loading} />
+                  <Label htmlFor="admin" className="cursor-pointer">Administrador</Label>
                 </div>
                 <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="user" id="user" />
-                  <Label htmlFor="user" className="cursor-pointer">Regular User</Label>
+                  <RadioGroupItem value="user" id="user" disabled={isSubmitting || loading} />
+                  <Label htmlFor="user" className="cursor-pointer">Usuário Regular</Label>
                 </div>
               </RadioGroup>
             </div>
             {error && <p className="text-sm font-medium text-red-500">{error}</p>}
           </CardContent>
           <CardFooter className="flex flex-col space-y-4">
-            <Button type="submit" className="w-full" disabled={isSubmitting}>
-              {isSubmitting ? "Creating account..." : "Create account"}
+            <Button type="submit" className="w-full" disabled={isSubmitting || loading}>
+              {isSubmitting || loading ? "Criando conta..." : "Criar conta"}
             </Button>
             <div className="text-center text-sm">
-              Already have an account?{" "}
+              Já tem uma conta?{" "}
               <Link to="/login" className="text-primary hover:underline">
-                Sign in
+                Entrar
               </Link>
             </div>
           </CardFooter>

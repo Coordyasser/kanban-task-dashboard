@@ -7,4 +7,5 @@ export interface AuthContextType {
   logout: () => Promise<void>;
   register: (name: string, email: string, password: string, role: 'admin' | 'user') => Promise<boolean>;
   loading: boolean;
+  authInitialized: boolean;
 }
